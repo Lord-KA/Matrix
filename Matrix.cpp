@@ -1,5 +1,6 @@
 #include "Matrix.h"
 
+
 std::ostream& operator<<(std::ostream &out, const Matrix &a)
 {
     for (size_t i=0; i < a.rows; ++i){
