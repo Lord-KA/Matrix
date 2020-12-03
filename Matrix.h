@@ -2,8 +2,9 @@
 #define MATRIX_h
 
 #include <iostream>
-#include <vector>
+#include <limits>
 #include <cstddef>
+#include <math.h>
 
 
 class Matrix
@@ -12,8 +13,10 @@ class Matrix
 
         size_t rows;
         size_t cols;
+        double determinant;
 
         double *matrix;
+
 
     public:
         Matrix();
@@ -25,8 +28,14 @@ class Matrix
         void FillMatrickSE();
         void WriteMatrix() const;
         Matrix AddMatrix( const Matrix & other ) const;
+        double CalcDeterminant();
+        Matrix GaussianMethod() const;
+
+        Matrix Transposition() const;
 
         Matrix operator+( const Matrix & other ) const;
+        Matrix operator*( const Matrix & other ) const;
+        Matrix operator*( const size_t n ) const;
         Matrix& operator=( const Matrix & other );
         
     friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
