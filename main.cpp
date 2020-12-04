@@ -5,15 +5,13 @@ int main()
     size_t r, c;
     std::cin >> r >> c;
     Matrix M(r, c);
-    Matrix Zero(r, c);
     Matrix M_2(r, c);
-    M_2.FillMatrickSE();
-    M.FillMatrickSE();
-    std::cout << M;
-    std::cout << M + Zero;
-    M.AddMatrix(Zero).WriteMatrix();
-    std::cout << '\n' << M;
-    std::cout << M_2.AddMatrix(M);
-    M.AddMatrix(M_2).WriteMatrix();
+    M.FillMatrix();
+    M_2.FillMatrixOp();
+    std::cout << M * M_2 * 2 + M << std::endl;
+    Matrix M_3(r, c);
+    M_3 = 2 * M * 2;
+    std::cout << M_3;
+
     return 0;
 }

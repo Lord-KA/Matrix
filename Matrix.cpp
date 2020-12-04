@@ -27,20 +27,33 @@ Matrix Matrix::operator*(const Matrix & other) const
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j){
             size_t sum = 0;
-            for(size_t r=1; r <= rows; ++r)
+            for(size_t r=0; r < rows; ++r)
                 sum += matrix[i * cols + r] * other.matrix[r * cols + j];
             result.matrix[i * cols + j] = sum;
         }
     return result;
 }
 
-Matrix Matrix::operator*(const size_t n) const
+
+
+Matrix Matrix::operator*(const double &n) const
 {
     Matrix result = Matrix(rows, cols);
     for(size_t i=0; i < rows * cols; ++i)
-        result.matrix[i] *= n;
+        result.matrix[i] = matrix[i] * n;
     return result;
 }
+
+
+
+Matrix operator*(const double &n, const Matrix &M)
+{
+    Matrix result = Matrix(M.rows, M.cols);
+    for(size_t i=0; i < M.rows * M.cols; ++i)
+        result.matrix[i] = M.matrix[i] * n;
+    return result;
+}
+
 
 Matrix& Matrix::operator=( const Matrix &other)
 {
@@ -128,6 +141,12 @@ double Matrix::CalcDeterminant()
     return determinant;
 }
 
+Matrix Matrix::GaussianMethod() const
+{
+    return Matrix();
+}
+
+
 void Matrix::FillMatrickSE()
 {
     size_t cnt = 0;
@@ -138,6 +157,30 @@ void Matrix::FillMatrickSE()
                 matrix[i * cols + j] = cnt;
             }
     }
+}
+
+
+void Matrix::FillMatrix()
+{
+    size_t cnt = 0;
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+        {
+            matrix[i * cols + j] = cnt;
+            ++cnt;
+        }
+}
+
+
+void Matrix::FillMatrixOp()
+{
+    size_t cnt = rows * cols - 1;
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+        {
+            matrix[i * cols + j] = cnt;
+            --cnt;
+        }
 }
 
 

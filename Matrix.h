@@ -28,6 +28,8 @@ class Matrix
 
         void FillMatrickSE();
         void WriteMatrix() const;
+        void FillMatrix();
+        void FillMatrixOp();
         Matrix AddMatrix( const Matrix & other ) const;
         double CalcDeterminant();
         Matrix GaussianMethod() const;
@@ -36,12 +38,15 @@ class Matrix
 
         Matrix operator+( const Matrix & other ) const;
         Matrix operator*( const Matrix & other ) const;
-        Matrix operator*( const size_t n ) const;
+        Matrix operator*( const double &n) const;
         Matrix& operator=( const Matrix & other );
         
     friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
+    friend Matrix operator*( const double &n, const Matrix &M);
 };
 
+
+Matrix operator*( const double &n, const Matrix &M );
 
 
 #endif
