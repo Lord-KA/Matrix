@@ -1,16 +1,28 @@
 #include "Matrix.h"
 
 
+double Matrix::operator() (const size_t i, const size_t j) const
+{
+    return matrix[i * cols + j];
+}
+
+double& Matrix::operator() (const size_t i, const size_t j)
+{
+    return matrix[i * cols + j];
+}
+
+
 std::ostream& operator<<(std::ostream &out, const Matrix &a)
 {
     for (size_t i=0; i < a.rows; ++i){
         for (size_t j=0; j < a.cols; ++j)
-            out << a.matrix[i * a.cols + j] << ' ';
+            out << a(i, j) << ' ';
         out << '\n';
     }
     out << "\n";
     return out;
 }
+
 
 Matrix Matrix::operator+(const Matrix & other) const
 {
@@ -33,8 +45,8 @@ Matrix Matrix::operator*(const Matrix & other) const
             for(size_t j=0; j < cols; ++j){
                 size_t sum = 0;
                 for(size_t r=0; r < rows; ++r)
-                    sum += matrix[i * cols + r] * other.matrix[r * cols + j];
-                result.matrix[i * cols + j] = sum;
+                    sum += (*this)(i, r) * other(r, j); 
+                result(i, j) = sum;
             }
         return result;
     }
@@ -43,8 +55,6 @@ Matrix Matrix::operator*(const Matrix & other) const
     exit(1);
 }
 
-
-
 Matrix Matrix::operator*(const double &n) const
 {
     Matrix result = Matrix(rows, cols);
@@ -52,8 +62,6 @@ Matrix Matrix::operator*(const double &n) const
         result.matrix[i] = matrix[i] * n;
     return result;
 }
-
-
 
 Matrix operator*(const double &n, const Matrix &M)
 {
@@ -90,15 +98,6 @@ Matrix& Matrix::operator=( const Matrix &other)
     return *this;
 }
 
-Matrix Matrix::Transposition() const
-{
-    Matrix result = Matrix(rows, cols);
-    for(size_t i=0; i < rows; ++i)
-        for(size_t j=0; j < cols; ++j)
-            result.matrix[i * cols + j] = matrix[j * cols + i];
-    return result;
-}
-
 
 Matrix::Matrix()
 {
@@ -109,14 +108,12 @@ Matrix::Matrix()
     matrix = nullptr;
 }
 
-
 Matrix::~Matrix()
 {
     delete[] matrix;
 
     matrix = nullptr;
 }
-
 
 Matrix::Matrix(const Matrix &other)
 {
@@ -136,7 +133,6 @@ Matrix::Matrix(const Matrix &other)
     }
 }
 
-
 Matrix::Matrix(size_t r, size_t c)
 {
     rows = r;
@@ -155,6 +151,16 @@ Matrix::Matrix(size_t r, size_t c)
 }
 
 
+Matrix Matrix::Transposition() const
+{
+    Matrix result = Matrix(rows, cols);
+    for(size_t i=0; i < rows; ++i)
+        for(size_t j=0; j < cols; ++j)
+            result(i, j) = (*this)(j, i); 
+    return result;
+}
+
+
 double Matrix::CalcDeterminant()
 {
     if (rows != cols){
@@ -167,7 +173,7 @@ double Matrix::CalcDeterminant()
     determinant = 0;
     Matrix Triangular = this->GaussianMethod();
     for(size_t i=0; i < rows; ++i)
-        determinant += Triangular.matrix[i * rows + i];
+        determinant += Triangular(i, i);
 
     return determinant;
 }
@@ -185,11 +191,10 @@ void Matrix::FillMagickSE()
         for (size_t j = 0; j < cols; ++j){
             if (cols <= j + i){
                 ++cnt;
-                matrix[i * cols + j] = cnt;
+                (*this)(i, j) = cnt; 
             }
     }
 }
-
 
 void Matrix::FillMatrix()
 {
@@ -197,11 +202,10 @@ void Matrix::FillMatrix()
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
         {
-            matrix[i * cols + j] = cnt;
+            (*this)(i, j) = cnt; 
             ++cnt;
         }
 }
-
 
 void Matrix::FillMatrixOp()
 {
@@ -209,7 +213,7 @@ void Matrix::FillMatrixOp()
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
         {
-            matrix[i * cols + j] = cnt;
+            (*this)(i, j) = cnt; 
             --cnt;
         }
 }
@@ -221,7 +225,7 @@ void Matrix::WriteMatrix() const
 
     for (size_t i = 0; i < rows; ++i){
         for (size_t j = 0; j < cols; ++j)
-            std::cout << matrix[i * cols + j] << ' ';
+            std::cout << (*this)(i, j) << ' '; 
         std::cout << std::endl;
     }
 }

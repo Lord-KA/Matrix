@@ -41,6 +41,9 @@ class Matrix
         Matrix operator*( const double &n) const;
         Matrix& operator=( const Matrix & other );
         
+        double operator() (const size_t i, const size_t j) const; 
+        double& operator() (const size_t i, const size_t j); 
+
     friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
     friend Matrix operator*( const double &n, const Matrix &M);
 };
