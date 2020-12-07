@@ -22,7 +22,7 @@ class Matrix
 
         ~Matrix();
 
-        void FillMatrickSE();
+        void FillMagickSE();
         void WriteMatrix() const;
         Matrix AddMatrix( const Matrix & other ) const;
 

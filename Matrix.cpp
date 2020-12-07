@@ -32,8 +32,7 @@ Matrix::Matrix()
 
 Matrix::~Matrix()
 {
-    if (matrix != nullptr)
-        delete[] matrix;
+    delete[] matrix;
 
     matrix = nullptr;
 }
@@ -59,7 +58,7 @@ Matrix::Matrix(size_t r, size_t c)
 }
 
 
-void Matrix::FillMatrickSE()
+void Matrix::FillMagickSE()
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
