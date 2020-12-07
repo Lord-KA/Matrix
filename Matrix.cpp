@@ -14,24 +14,33 @@ std::ostream& operator<<(std::ostream &out, const Matrix &a)
 
 Matrix Matrix::operator+(const Matrix & other) const
 {
-    Matrix result = Matrix(rows, cols);
-    for(size_t i=0; i < rows; ++i)
-        for(size_t j=0; j < cols; ++j)
-            result.matrix[i * cols + j] = matrix[i * cols + j] + other.matrix[i * cols + j];
-    return result;
+    if(rows == other.rows && cols == other.cols){
+        Matrix result = Matrix(other);
+        for(size_t i=0; i < rows * cols; ++i)
+            result.matrix[i] += matrix[i];
+        return result; 
+    }
+
+    std::cerr << "Error: summaring matrixes of different sizes." << std::endl;
+    exit(1);
 }
 
 Matrix Matrix::operator*(const Matrix & other) const
 {
-    Matrix result = Matrix(rows, cols);
-    for(size_t i=0; i < rows; ++i)
-        for(size_t j=0; j < cols; ++j){
-            size_t sum = 0;
-            for(size_t r=0; r < rows; ++r)
-                sum += matrix[i * cols + r] * other.matrix[r * cols + j];
-            result.matrix[i * cols + j] = sum;
-        }
-    return result;
+    if(cols == other.rows){
+        Matrix result = Matrix(rows, cols);
+        for(size_t i=0; i < rows; ++i)
+            for(size_t j=0; j < cols; ++j){
+                size_t sum = 0;
+                for(size_t r=0; r < rows; ++r)
+                    sum += matrix[i * cols + r] * other.matrix[r * cols + j];
+                result.matrix[i * cols + j] = sum;
+            }
+        return result;
+    }
+
+    std::cerr << "Error: bad input for multiplication." << std::endl;
+    exit(1);
 }
 
 
@@ -63,11 +72,20 @@ Matrix& Matrix::operator=( const Matrix &other)
     rows = other.rows;
     cols = other.cols;
 
-    delete[] matrix;
+    //delete[] matrix;
+    double *temp = matrix;
 
-    matrix = new double[rows * cols];
-    for(size_t i=0; i < rows*cols; ++i)
-        matrix[i] = other.matrix[i];
+    try{
+        matrix = new double[rows * cols];
+        for(size_t i=0; i < rows*cols; ++i)
+            matrix[i] = other.matrix[i];
+        delete[] temp;
+    }
+    catch(...)
+    {
+        matrix = temp;
+        std::cerr << "Error: memory allocation has failed." << std::endl;
+    }
 
     return *this;
 }
@@ -94,8 +112,7 @@ Matrix::Matrix()
 
 Matrix::~Matrix()
 {
-    if (matrix != nullptr)
-        delete[] matrix;
+    delete[] matrix;
 
     matrix = nullptr;
 }
@@ -107,20 +124,34 @@ Matrix::Matrix(const Matrix &other)
     cols = other.cols;
     determinant = other.determinant;
 
-    matrix = new double[rows * cols];
+    try{
+        matrix = new double[rows * cols];
 
-    for(size_t i = 0; i < rows * cols; ++i)
-            matrix[i] = other.matrix[i];
+        for(size_t i = 0; i < rows * cols; ++i)
+                matrix[i] = other.matrix[i];
+    }
+    catch(...)
+    {
+        std::cerr << "Error: memory allocation has failed." << std::endl;
+    }
 }
+
 
 Matrix::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
     determinant = std::numeric_limits<double>::quiet_NaN();
-    matrix = new double[rows * cols];
-    for(size_t i=0; i < rows * cols; ++i)
-        matrix[i] = 0;
+
+    try{
+        matrix = new double[rows * cols];
+        for(size_t i=0; i < rows * cols; ++i)
+            matrix[i] = 0;
+    }
+    catch(...)
+    {
+        std::cerr << "Error: memory allocation has failed." << std::endl;
+    }
 }
 
 
@@ -147,7 +178,7 @@ Matrix Matrix::GaussianMethod() const
 }
 
 
-void Matrix::FillMatrickSE()
+void Matrix::FillMagickSE()
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
@@ -199,7 +230,5 @@ void Matrix::WriteMatrix() const
 
 Matrix Matrix::AddMatrix(const Matrix &other) const
 {
-    //Matrix result;
-    //result = *this + other;
     return *this + other;
 }

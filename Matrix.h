@@ -26,7 +26,7 @@ class Matrix
 
         ~Matrix();
 
-        void FillMatrickSE();
+        void FillMagickSE();
         void WriteMatrix() const;
         void FillMatrix();
         void FillMatrixOp();
