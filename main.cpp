@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include <iostream>
 
 int main()
 {
@@ -7,8 +8,8 @@ int main()
     Matrix M(r, c);
     Matrix Zero(r, c);
     Matrix M_2(r, c);
-    M_2.FillMatrickSE();
-    M.FillMatrickSE();
+    M_2.FillMagickSE();
+    M.FillMagickSE();
     std::cout << M;
     std::cout << M + Zero;
     M.AddMatrix(Zero).WriteMatrix();

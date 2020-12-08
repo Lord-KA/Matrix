@@ -1,23 +1,39 @@
 #include "Matrix.h"
 
+#include <iostream>
+
 std::ostream& operator<<(std::ostream &out, const Matrix &a)
 {
     for (size_t i=0; i < a.rows; ++i){
         for (size_t j=0; j < a.cols; ++j)
-            out << a.matrix[i * a.cols + j] << ' ';
-        out << '\n';
+            out << a.data[i][j] << ' ';
+        out << std::endl;
     }
-    out << "\n";
     return out;
 }
+
 
 Matrix Matrix::operator+(const Matrix & other) const
 {
     Matrix result = Matrix(rows, cols);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
-            result.matrix[i * cols + j] = matrix[i * cols + j] + other.matrix[i * cols + j];
+            result.data[i][j] = data[i][j] + other.data[i][j];
     return result;
+}
+
+Matrix operator*(double N, const Matrix & right) 
+{
+    Matrix result = Matrix(right);
+    for(size_t i=0; i < right.rows; ++i)
+        for(size_t j=0; j < right.cols; ++j)
+            result.data[i][j] *= N;
+    return result;
+}
+
+Matrix Matrix::operator-(const Matrix & other) const
+{
+    return *this + -1 * other;
 }
 
 
@@ -26,15 +42,18 @@ Matrix::Matrix()
     rows = 0;
     cols = 0;
 
-    matrix = nullptr;
+    data = nullptr;
 }
 
 
 Matrix::~Matrix()
-{
-    delete[] matrix;
-
-    matrix = nullptr;
+{  
+    if (data != nullptr){
+        for (size_t i = 0; i < rows; ++i)
+            delete[] data[i];
+        delete[] data;
+        data = nullptr;
+    }
 }
 
 
@@ -42,19 +61,34 @@ Matrix::Matrix(const Matrix &other)
 {
     rows = other.rows;
     cols = other.cols;
-    matrix = new double[rows * cols];
+    data = new double*[rows];
 
-    for(size_t i = 0; i < rows * cols; ++i)
-            matrix[i] = other.matrix[i];
+    for(size_t i = 0; i < rows; ++i)
+    {
+        data[i] = new double[cols];
+        for(size_t j = 0; j < cols; ++j)
+            data[i][j] = other.data[i][j];
+    }
 }
 
 Matrix::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
-    matrix = new double[rows * cols];
-    for(size_t i=0; i < rows * cols; ++i)
-        matrix[i] = 0;
+    try{
+    data = new double*[rows];
+    for(size_t i=0; i < rows; ++i)
+        data[i] = new double [cols];
+
+    for(size_t i=0; i<rows; ++i)
+        for(size_t j=0; j<cols; ++j)
+            data[i][j] = 0;
+    }
+    catch(...)
+    {
+        std::cerr << "Error has appeared while allocating memory!" << std::endl;
+        exit(1);
+    }
 }
 
 
@@ -67,7 +101,7 @@ void Matrix::FillMagickSE()
             if (cols <= j + i){
                 std::cout << '\n';
                 ++cnt;
-                matrix[i * cols + j] = cnt;
+                data[i][j] = cnt;
             }
     }
     std::cout << '\n';
@@ -80,33 +114,13 @@ void Matrix::WriteMatrix() const
 
     for (size_t i = 0; i < rows; ++i){
         for (size_t j = 0; j < cols; ++j)
-            std::cout << matrix[i * cols + j] << ' ';
+            std::cout << data[i][j] << ' ';
         std::cout << std::endl;
     }
 }
 
 
-Matrix& Matrix::operator=( const Matrix &other)
-{
-    if (this == &other)
-        return *this;
-
-    rows = other.rows;
-    cols = other.cols;
-
-    delete[] matrix;
-
-    matrix = new double[rows * cols];
-    for(size_t i=0; i < rows*cols; ++i)
-        matrix[i] = other.matrix[i];
-
-    return *this;
-}
-
-
 Matrix Matrix::AddMatrix(const Matrix &other) const
 {
-    //Matrix result;
-    //result = *this + other;
     return *this + other;
 }

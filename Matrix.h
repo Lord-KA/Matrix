@@ -1,37 +1,33 @@
 #ifndef MATRIX_h
 #define MATRIX_h
 
-#include <iostream>
-#include <vector>
-#include <cstddef>
+#include <ostream>
 
 
-class Matrix
+struct Matrix
 {
-    private:
+    size_t rows;
+    size_t cols;
 
-        size_t rows;
-        size_t cols;
+    double **data;
 
-        double *matrix;
+    Matrix();
+    Matrix( size_t rows, size_t cols);
+    Matrix( const Matrix & other);
+    
+    ~Matrix();
 
-    public:
-        Matrix();
-        Matrix( size_t rows, size_t cols);
-        Matrix( const Matrix & other);
+    void FillMagickSE();
+    void WriteMatrix() const;
+    void ReadMatrix();
+    Matrix AddMatrix( const Matrix & other ) const;
 
-        ~Matrix();
-
-        void FillMagickSE();
-        void WriteMatrix() const;
-        Matrix AddMatrix( const Matrix & other ) const;
-
-        Matrix operator+( const Matrix & other ) const;
-        Matrix& operator=( const Matrix & other );
+    Matrix operator+( const Matrix & other ) const;
+    Matrix operator-( const Matrix & other ) const;
         
-    friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
 };
 
-
+std::ostream & operator<< (std::ostream & left, const Matrix & right);
+Matrix operator* (double left, const Matrix & right);
 
 #endif
