@@ -1,4 +1,4 @@
-#include "Matrix.h"
+#include "Matrix.hpp"
 
 
 double Matrix::operator() (const size_t i, const size_t j) const
@@ -110,7 +110,7 @@ Matrix::Matrix()
 
 Matrix::~Matrix()
 {
-    delete[] matrix;
+    //delete[] matrix;
 
     matrix = nullptr;
 }
