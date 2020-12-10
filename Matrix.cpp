@@ -124,3 +124,12 @@ Matrix Matrix::AddMatrix(const Matrix &other) const
 {
     return *this + other;
 }
+
+
+void Matrix::ReadMatrix()
+{
+    for(size_t i=0; i<rows; ++i)
+	for(size_t j=0; j<cols; ++j)
+	    std::cin >> data[i][j];
+}
+
