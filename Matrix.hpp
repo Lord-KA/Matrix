@@ -2,10 +2,7 @@
 #define MATRIX_h
 
 #include <iostream>
-#include <limits>
 #include <cstddef>
-#include <math.h>
-
 
 
 class Matrix
@@ -37,6 +34,7 @@ class Matrix
         Matrix Transposition() const;
 
         Matrix operator+( const Matrix & other ) const;
+        Matrix operator-( const Matrix & other ) const;
         Matrix operator*( const Matrix & other ) const;
         Matrix operator*( const double &n) const;
         Matrix& operator=( const Matrix & other );

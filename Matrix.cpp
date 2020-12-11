@@ -1,5 +1,8 @@
 #include "Matrix.hpp"
 
+#include <limits>
+#include <cmath>
+
 
 double Matrix::operator() (const size_t i, const size_t j) const
 {
@@ -36,6 +39,16 @@ Matrix Matrix::operator+(const Matrix & other) const
     std::cerr << "Error: summaring matrixes of different sizes." << std::endl;
     exit(1);
 }
+
+Matrix Matrix::operator-(const Matrix & other) const
+{
+    if(rows == other.rows && cols == other.cols)
+        return *this + -1 * other;
+    
+    std::cerr << "Error: subtracting matrixes of different sizes." << std::endl;
+    exit(1);
+}
+
 
 Matrix Matrix::operator*(const Matrix & other) const
 {
@@ -103,14 +116,13 @@ Matrix::Matrix()
 {
     rows = 0;
     cols = 0;
-    determinant = 0;
-
+    determinant = std::numeric_limits<double>::quiet_NaN();
     matrix = nullptr;
 }
 
 Matrix::~Matrix()
 {
-    //delete[] matrix;
+    delete[] matrix;
 
     matrix = nullptr;
 }
@@ -169,9 +181,11 @@ double Matrix::CalcDeterminant()
     }
     if (!std::isnan(determinant))
         return determinant;
-
+    
+    
     determinant = 0;
     Matrix Triangular = this->GaussianMethod();
+    std::cout << Triangular;
     for(size_t i=0; i < rows; ++i)
         determinant += Triangular(i, i);
 
@@ -180,7 +194,21 @@ double Matrix::CalcDeterminant()
 
 Matrix Matrix::GaussianMethod() const
 {
-    return Matrix();
+    Matrix result = Matrix(*this);
+    
+    for (size_t k=0; k < rows; ++k)
+    {
+        //for (size_t j=0; j < cols; ++j)
+        //   result(k, j) /= (*this)(k, k);
+
+        for (size_t i=k+1; i < rows; ++i)
+        {
+            double ratio = (*this)(k,k) / result(i, k);
+            for (size_t j = 0; j < cols; ++j)
+                result(i, j) -= result(k, j) * ratio;
+        }
+    }
+    return result;
 }
 
 
@@ -209,7 +237,7 @@ void Matrix::FillMatrix()
 
 void Matrix::FillMatrixOp()
 {
-    size_t cnt = rows * cols - 1;
+    size_t cnt = rows * cols;
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
         {
