@@ -3,25 +3,18 @@
 
 int main()
 {
+    
     size_t r, c;
     std::cin >> r >> c;
-    Matrix M(r, c);
-    Matrix w;
-    Matrix p(M);
-    Matrix q(p), o(w);
+    Matrix w_1(r, c);
+    w_1.ReadMatrix();
+    std::cout << w_1 + 5 * w_1 << std::endl;
 
-    Matrix Zero(r, c);
-    Matrix M_2(r, c);
-    M_2.FillMagickSE();
-    M.FillMagickSE();
-    std::cout << M;
-    std::cout << M + Zero*r;
-    M.AddMatrix(Zero).WriteMatrix();
-    std::cout << '\n' << M;
-    std::cout << M_2.AddMatrix(M);
-    M.AddMatrix(M_2).WriteMatrix();
-
-    M.ReadMatrix();
-    std::cout << M - M_2 * 1/3;
-    return 0;
+    Matrix w_2 = .33 * w_1;
+    w_2.WriteMatrix();
+    std::cout << "@@@@@@@@@@@@" << std::endl;
+ 
+    Matrix q;
+    q.ReadMatrix();
+    std::cout << q;
 }

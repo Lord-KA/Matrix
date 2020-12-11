@@ -18,7 +18,7 @@ Matrix Matrix::operator+(const Matrix & other) const
     Matrix result = Matrix(rows, cols);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
-            result.data[i][j] = data[i][j] + other.data[i][j];
+            result.data[i][j] += other.data[i][j];
     return result;
 }
 
@@ -128,8 +128,24 @@ Matrix Matrix::AddMatrix(const Matrix &other) const
 
 void Matrix::ReadMatrix()
 {
+    size_t r, c;
+    std::cin >> r >> c;
+    if (r != rows || c != cols)
+    {
+        if (data != nullptr){
+                for (size_t i = 0; i < rows; ++i)
+                    delete[] data[i];
+                delete[] data;
+            data = nullptr;
+        }
+        rows = r;
+        cols = c;
+        data = new double*[rows];
+        for(size_t i=0; i < rows; ++i)
+            data[i] = new double [cols];
+    }
     for(size_t i=0; i<rows; ++i)
-	for(size_t j=0; j<cols; ++j)
-	    std::cin >> data[i][j];
+	    for(size_t j=0; j<cols; ++j)
+	        std::cin >> data[i][j];
 }
 
