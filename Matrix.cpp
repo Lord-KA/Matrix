@@ -183,11 +183,11 @@ double Matrix::CalcDeterminant()
         return determinant;
     
     
-    determinant = 0;
+    determinant = 1;
     Matrix Triangular = this->GaussianMethod();
     std::cout << Triangular;
     for(size_t i=0; i < rows; ++i)
-        determinant += Triangular(i, i);
+        determinant *= Triangular(i, i);
 
     return determinant;
 }
@@ -198,14 +198,14 @@ Matrix Matrix::GaussianMethod() const
     
     for (size_t k=0; k < rows; ++k)
     {
-        //for (size_t j=0; j < cols; ++j)
-        //   result(k, j) /= (*this)(k, k);
 
         for (size_t i=k+1; i < rows; ++i)
         {
-            double ratio = (*this)(k,k) / result(i, k);
+            double ratio = result(i, k) / result(k, k);
+            std::cout << result << std::endl;
             for (size_t j = 0; j < cols; ++j)
-                result(i, j) -= result(k, j) * ratio;
+                if (result(k, j)) // check to protect from NaN; TODO think of some boundary values
+                    result(i, j) -= result(k, j) * ratio;
         }
     }
     return result;
@@ -258,6 +258,23 @@ void Matrix::WriteMatrix() const
     }
 }
 
+
+void Matrix::ReadMatrix()
+{
+    size_t r, c;
+    std::cin >> r >> c;
+    if (r != rows || c != cols)
+    {
+        delete[] matrix;
+        matrix = nullptr;
+        rows = r;
+        cols = c;
+        matrix = new double[rows * cols];
+        }
+    for(size_t i=0; i<rows; ++i)
+        for(size_t j=0; j<cols; ++j)
+            std::cin >> (*this)(i, j);
+}
 
 
 Matrix Matrix::AddMatrix(const Matrix &other) const

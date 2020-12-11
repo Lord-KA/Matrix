@@ -25,6 +25,7 @@ class Matrix
 
         void FillMagickSE();
         void WriteMatrix() const;
+        void ReadMatrix();
         void FillMatrix();
         void FillMatrixOp();
         Matrix AddMatrix( const Matrix & other ) const;
