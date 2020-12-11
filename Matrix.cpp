@@ -176,8 +176,9 @@ Matrix Matrix::Transposition() const
 double Matrix::CalcDeterminant()
 {
     if (rows != cols){
-        std::cerr << "Error: matrix is not square" << std::endl;
-        return std::numeric_limits<double>::quiet_NaN();
+        //std::cerr << "Error: matrix is not square" << std::endl;
+        //return std::numeric_limits<double>::quiet_NaN();
+        return (*this).MinorsMethod();
     }
     if (!std::isnan(determinant))
         return determinant;
@@ -185,7 +186,7 @@ double Matrix::CalcDeterminant()
     
     determinant = 1;
     Matrix Triangular = this->GaussianMethod();
-    std::cout << Triangular;
+    std::cout << Triangular << std::endl;
     for(size_t i=0; i < rows; ++i)
         determinant *= Triangular(i, i);
 
@@ -202,10 +203,39 @@ Matrix Matrix::GaussianMethod() const
         for (size_t i=k+1; i < rows; ++i)
         {
             double ratio = result(i, k) / result(k, k);
-            std::cout << result << std::endl;
             for (size_t j = 0; j < cols; ++j)
-                if (result(k, j)) // check to protect from NaN; TODO think of some boundary values
+                if (result(k, j) && ratio && !std::isnan(result(k, j)) && !std::isnan(ratio)){ // check to protect from NaN; TODO think of some boundary values
                     result(i, j) -= result(k, j) * ratio;
+                    if (std::isnan(result(i, i)))
+                        std::cout << "######" << result(i, i) << ' ' << ratio << ' ' << result(k, j) << std::endl;
+                }
+        }
+    }
+    return result;
+}
+
+double Matrix::MinorsMethod() const
+{
+    double result = 0;
+    for(size_t i=0; i < rows; ++i){
+        result += (i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
+        //std::cout << i << std::endl; //DEBUG
+        //std::cout << (*this).Minor(0, i) << std::endl; //DEBUG
+    }
+    return result;
+}
+
+Matrix Matrix::Minor(size_t i, size_t j) const
+{
+    Matrix result(rows-1, cols-1);
+    bool flag_r = false;
+    for(size_t r=0; r<rows-1; ++r){
+        bool flag_c = false;
+        for(size_t c=0; c<cols-1; ++c){
+            if (r == i) flag_r = true;
+            if (c == j) flag_c = true;
+        
+            result(r, c) = (*this)(r + flag_r, c + flag_c);
         }
     }
     return result;

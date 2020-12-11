@@ -18,8 +18,27 @@ int main()
     std::cout << K_1.CalcDeterminant() << std::endl;
     std::cout << "@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
     
-    Matrix W_1(r, c);
-    W_1.ReadMatrix();
-    std::cout << W_1.CalcDeterminant() << std::endl;
+    Matrix W_1(r, c), W_2(r, c), W_3(r, c), W_4(r, c);
+    W_1.FillMatrix();
+    W_2.FillMagickSE();
+    W_3.FillMatrixOp();
+    W_4.FillMatrix();
+    W_4 = 14 * W_4;
+    
+
+    
+    std::cout << (W_1.CalcDeterminant()) << std::endl;
+    std::cout << (W_2.CalcDeterminant()) << std::endl;
+    std::cout << (W_3.CalcDeterminant()) << std::endl;
+    std::cout << (W_4.CalcDeterminant()) << std::endl;
+    
+    std::cout << (W_1.MinorsMethod()) << std::endl;
+    std::cout << (W_1.MinorsMethod()) << std::endl;
+    std::cout << (W_2.MinorsMethod()) << std::endl;
+    std::cout << (W_3.MinorsMethod()) << std::endl;
+    //std::cout << (W_4.CalcDeterminant() == W_4.MinorsMethod()) << std::endl;
+    //std::cout << (W_2.CalcDeterminant() == W_2.MinorsMethod()) << std::endl;
+    //std::cout << (W_3.CalcDeterminant() == W_3.MinorsMethod()) << std::endl;
+    //std::cout << (W_4.CalcDeterminant() == W_4.MinorsMethod()) << std::endl;
     return 0;
 }

@@ -31,6 +31,8 @@ class Matrix
         Matrix AddMatrix( const Matrix & other ) const;
         double CalcDeterminant();
         Matrix GaussianMethod() const;
+        double MinorsMethod() const;
+        Matrix Minor(size_t i, size_t j) const;
 
         Matrix Transposition() const;
 
