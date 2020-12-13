@@ -85,7 +85,7 @@ Matrix operator*(const double &n, const Matrix &M)
 }
 
 
-Matrix& Matrix::operator=( const Matrix &other)
+Matrix& Matrix::operator=(const Matrix &other)
 {
     if (this == &other)
         return *this;
@@ -178,7 +178,7 @@ double Matrix::CalcDeterminant()
     if (!std::isnan(determinant))
         return determinant;
     
-    if (rows != cols && false) // GaussianMethod doesn't work consistantly.
+    if (rows != cols) 
         return (*this).MinorsMethod();
     
 
@@ -186,7 +186,6 @@ double Matrix::CalcDeterminant()
     Matrix Triangular = (*this).GaussianMethod();
     if (Triangular.matrix == nullptr)
         return (*this).MinorsMethod();
-    // std::cout << Triangular << std::endl; //DEBUG
     for(size_t i=0; i < rows; ++i)
         determinant *= Triangular(i, i);
 
@@ -196,14 +195,12 @@ double Matrix::CalcDeterminant()
 Matrix Matrix::GaussianMethod() const
 {
     Matrix result = Matrix(*this);
-    size_t determinant_ratio = 1;
+    int determinant_ratio = 1;
     for (size_t k=0; k < rows; ++k)
     {
-        // std::cout << result << std::endl; //DEBUG
-        /*
         if (result(k, k) == 0){
             size_t i = k + 1;
-            while (result(k, i) == 0)
+            while (i < cols && result(k, i) == 0)
                 ++i;
             if (i != cols){
                 result.swapRows(k, i);
@@ -212,16 +209,15 @@ Matrix Matrix::GaussianMethod() const
             else
                 return Matrix();
         }
-        */
+        
         for (size_t i=k+1; i < rows; ++i)
         {
             double ratio = result(i, k) / result(k, k);
-            for (size_t j = 0; j < cols; ++j)
-                if (result(k, j) && ratio && !std::isnan(result(k, j)) && !std::isnan(ratio)){ // check to protect from NaN; TODO think of some boundary values
-                    result(i, j) -= result(k, j) * ratio;
-                    if (std::isnan(result(i, i))) //DEBUG
-                        std::cout << "######" << result(i, i) << ' ' << ratio << ' ' << result(k, j) << std::endl;
-                }
+            for (size_t j = 0; j < cols; ++j){
+                result(i, j) -= result(k, j) * ratio;
+                if (std::isnan(result(i, i))) //DEBUG
+                    std::cout << "Error: ratio in GaussianMethod is none; {result(i, i), ratio, result(k, j)} = " << result(i, i) << ' ' << ratio << ' ' << result(k, j) << std::endl;
+            }
         }
     }
     return result * determinant_ratio;
@@ -243,8 +239,6 @@ double Matrix::MinorsMethod() const
 
     for(size_t i=0; i < rows; ++i){
         result += (*this)(0, i) * (i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
-        // std::cout << i << std::endl; //DEBUG
-        // std::cout << (*this).Minor(0, i) << std::endl; //DEBUG
     }
     return result;
 }
