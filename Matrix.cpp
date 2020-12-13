@@ -15,19 +15,6 @@ T& Matrix<T>::operator() (const size_t i, const size_t j)
 
 
 template<typename T>
-std::ostream& operator<<(std::ostream &out, const Matrix<T> &a)
-{
-    for (size_t i=0; i < a.rows; ++i){
-        for (size_t j=0; j < a.cols; ++j)
-            out << a(i, j) << ' ';
-        out << '\n';
-    }
-    out << "\n";
-    return out;
-}
-
-
-template<typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
 {
     if(rows == other.rows && cols == other.cols){
@@ -77,15 +64,6 @@ Matrix<T> Matrix<T>::operator*(const T &n) const
     Matrix<T> result = Matrix<T>(rows, cols);
     for(size_t i=0; i < rows * cols; ++i)
         result.matrix[i] = matrix[i] * n;
-    return result;
-}
-
-template<typename T>
-Matrix<T> operator*(const T &n, const Matrix<T> &M)
-{
-    Matrix<T> result = Matrix<T>(M.rows, M.cols);
-    for(size_t i=0; i < M.rows * M.cols; ++i)
-        result.matrix[i] = M.matrix[i] * n;
     return result;
 }
 
@@ -351,6 +329,3 @@ Matrix<T> Matrix<T>::AddMatrix(const Matrix<T> &other) const
 {
     return *this + other;
 }
-
-
-Matrix<double>;

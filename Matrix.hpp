@@ -46,12 +46,26 @@ class Matrix
         T operator() (const size_t i, const size_t j) const; 
         T& operator() (const size_t i, const size_t j); 
 
-    friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
-    friend Matrix operator*( const T &n, const Matrix &M);
-};
+    friend std::ostream& operator<<(std::ostream &out, const Matrix &a)
+    {    
+        for (size_t i=0; i < a.rows; ++i){
+            for (size_t j=0; j < a.cols; ++j)
+                out << a(i, j) << ' ';
+            out << '\n';
+        }
+        out << "\n";
+        return out;
+    }
 
-template<typename T>
-Matrix<T> operator*( const T &n, const Matrix<T> &M );
+    friend Matrix operator*( const T &n, const Matrix &M)
+    {
+        Matrix<T> result = Matrix<T>(M.rows, M.cols);
+        for(size_t i=0; i < M.rows * M.cols; ++i)
+           result.matrix[i] = M.matrix[i] * n;
+        return result;
+    }
+
+};
 
 #include "Matrix.cpp"
 #endif
