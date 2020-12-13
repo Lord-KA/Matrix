@@ -175,18 +175,18 @@ Matrix Matrix::Transposition() const
 
 double Matrix::CalcDeterminant()
 {
-    if (rows != cols){
-        //std::cerr << "Error: matrix is not square" << std::endl;
-        //return std::numeric_limits<double>::quiet_NaN();
-        return (*this).MinorsMethod();
-    }
     if (!std::isnan(determinant))
         return determinant;
     
+    if (rows != cols && false) // GaussianMethod doesn't work consistantly.
+        return (*this).MinorsMethod();
     
+
     determinant = 1;
-    Matrix Triangular = this->GaussianMethod();
-    std::cout << Triangular << std::endl;
+    Matrix Triangular = (*this).GaussianMethod();
+    if (Triangular.matrix == nullptr)
+        return (*this).MinorsMethod();
+    // std::cout << Triangular << std::endl; //DEBUG
     for(size_t i=0; i < rows; ++i)
         determinant *= Triangular(i, i);
 
@@ -196,31 +196,55 @@ double Matrix::CalcDeterminant()
 Matrix Matrix::GaussianMethod() const
 {
     Matrix result = Matrix(*this);
-    
+    size_t determinant_ratio = 1;
     for (size_t k=0; k < rows; ++k)
     {
-
+        // std::cout << result << std::endl; //DEBUG
+        /*
+        if (result(k, k) == 0){
+            size_t i = k + 1;
+            while (result(k, i) == 0)
+                ++i;
+            if (i != cols){
+                result.swapRows(k, i);
+                determinant_ratio *= -1;
+            }
+            else
+                return Matrix();
+        }
+        */
         for (size_t i=k+1; i < rows; ++i)
         {
             double ratio = result(i, k) / result(k, k);
             for (size_t j = 0; j < cols; ++j)
                 if (result(k, j) && ratio && !std::isnan(result(k, j)) && !std::isnan(ratio)){ // check to protect from NaN; TODO think of some boundary values
                     result(i, j) -= result(k, j) * ratio;
-                    if (std::isnan(result(i, i)))
+                    if (std::isnan(result(i, i))) //DEBUG
                         std::cout << "######" << result(i, i) << ' ' << ratio << ' ' << result(k, j) << std::endl;
                 }
         }
     }
-    return result;
+    return result * determinant_ratio;
+}
+
+void Matrix::swapRows(size_t r_1, size_t r_2)
+{
+    for(size_t i=0; i<cols; ++i){
+        double temp = (*this)(r_1, i);
+        (*this)(r_1, i) = (*this)(r_2, i);
+        (*this)(r_2, i) = temp;
+    }
 }
 
 double Matrix::MinorsMethod() const
 {
     double result = 0;
+    if (rows==2 && cols==2) return (*this)(0,0) * (*this)(1,1) - (*this)(0, 1) * (*this)(1, 0);
+
     for(size_t i=0; i < rows; ++i){
-        result += (i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
-        //std::cout << i << std::endl; //DEBUG
-        //std::cout << (*this).Minor(0, i) << std::endl; //DEBUG
+        result += (*this)(0, i) * (i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
+        // std::cout << i << std::endl; //DEBUG
+        // std::cout << (*this).Minor(0, i) << std::endl; //DEBUG
     }
     return result;
 }

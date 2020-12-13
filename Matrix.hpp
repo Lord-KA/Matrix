@@ -31,6 +31,7 @@ class Matrix
         Matrix AddMatrix( const Matrix & other ) const;
         double CalcDeterminant();
         Matrix GaussianMethod() const;
+        void swapRows(size_t i, size_t j);
         double MinorsMethod() const;
         Matrix Minor(size_t i, size_t j) const;
 
