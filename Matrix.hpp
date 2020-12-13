@@ -4,16 +4,16 @@
 #include <iostream>
 #include <cstddef>
 
-
+template<typename T>
 class Matrix
 {
     private:
 
         size_t rows;
         size_t cols;
-        double determinant;
+        T determinant;
 
-        double *matrix;
+        T *matrix;
 
 
     public:
@@ -29,10 +29,10 @@ class Matrix
         void FillMatrix();
         void FillMatrixOp();
         Matrix AddMatrix( const Matrix & other ) const;
-        double CalcDeterminant();
+        T CalcDeterminant();
         Matrix GaussianMethod() const;
         void swapRows(size_t i, size_t j);
-        double MinorsMethod() const;
+        T MinorsMethod() const;
         Matrix Minor(size_t i, size_t j) const;
 
         Matrix Transposition() const;
@@ -40,18 +40,18 @@ class Matrix
         Matrix operator+( const Matrix & other ) const;
         Matrix operator-( const Matrix & other ) const;
         Matrix operator*( const Matrix & other ) const;
-        Matrix operator*( const double &n) const;
+        Matrix operator*( const T &n) const;
         Matrix& operator=( const Matrix & other );
         
-        double operator() (const size_t i, const size_t j) const; 
-        double& operator() (const size_t i, const size_t j); 
+        T operator() (const size_t i, const size_t j) const; 
+        T& operator() (const size_t i, const size_t j); 
 
     friend std::ostream& operator<<(std::ostream &out, const Matrix &M);  
-    friend Matrix operator*( const double &n, const Matrix &M);
+    friend Matrix operator*( const T &n, const Matrix &M);
 };
 
+template<typename T>
+Matrix<T> operator*( const T &n, const Matrix<T> &M );
 
-Matrix operator*( const double &n, const Matrix &M );
-
-
+#include "Matrix.cpp"
 #endif

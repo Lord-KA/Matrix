@@ -1,21 +1,21 @@
-#include "Matrix.hpp"
-
 #include <limits>
 #include <cmath>
 
-
-double Matrix::operator() (const size_t i, const size_t j) const
+template<typename T>
+T Matrix<T>::operator() (const size_t i, const size_t j) const
 {
     return matrix[i * cols + j];
 }
 
-double& Matrix::operator() (const size_t i, const size_t j)
+template<typename T>
+T& Matrix<T>::operator() (const size_t i, const size_t j)
 {
     return matrix[i * cols + j];
 }
 
 
-std::ostream& operator<<(std::ostream &out, const Matrix &a)
+template<typename T>
+std::ostream& operator<<(std::ostream &out, const Matrix<T> &a)
 {
     for (size_t i=0; i < a.rows; ++i){
         for (size_t j=0; j < a.cols; ++j)
@@ -27,10 +27,11 @@ std::ostream& operator<<(std::ostream &out, const Matrix &a)
 }
 
 
-Matrix Matrix::operator+(const Matrix & other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
 {
     if(rows == other.rows && cols == other.cols){
-        Matrix result = Matrix(other);
+        Matrix<T> result = Matrix<T>(other);
         for(size_t i=0; i < rows * cols; ++i)
             result.matrix[i] += matrix[i];
         return result; 
@@ -40,7 +41,8 @@ Matrix Matrix::operator+(const Matrix & other) const
     exit(1);
 }
 
-Matrix Matrix::operator-(const Matrix & other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator-(const Matrix<T> & other) const
 {
     if(rows == other.rows && cols == other.cols)
         return *this + -1 * other;
@@ -50,10 +52,11 @@ Matrix Matrix::operator-(const Matrix & other) const
 }
 
 
-Matrix Matrix::operator*(const Matrix & other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
 {
     if(cols == other.rows){
-        Matrix result = Matrix(rows, cols);
+        Matrix<T> result = Matrix<T>(rows, cols);
         for(size_t i=0; i < rows; ++i)
             for(size_t j=0; j < cols; ++j){
                 size_t sum = 0;
@@ -68,24 +71,27 @@ Matrix Matrix::operator*(const Matrix & other) const
     exit(1);
 }
 
-Matrix Matrix::operator*(const double &n) const
+template<typename T>
+Matrix<T> Matrix<T>::operator*(const T &n) const
 {
-    Matrix result = Matrix(rows, cols);
+    Matrix<T> result = Matrix<T>(rows, cols);
     for(size_t i=0; i < rows * cols; ++i)
         result.matrix[i] = matrix[i] * n;
     return result;
 }
 
-Matrix operator*(const double &n, const Matrix &M)
+template<typename T>
+Matrix<T> operator*(const T &n, const Matrix<T> &M)
 {
-    Matrix result = Matrix(M.rows, M.cols);
+    Matrix<T> result = Matrix<T>(M.rows, M.cols);
     for(size_t i=0; i < M.rows * M.cols; ++i)
         result.matrix[i] = M.matrix[i] * n;
     return result;
 }
 
 
-Matrix& Matrix::operator=(const Matrix &other)
+template<typename T>
+Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 {
     if (this == &other)
         return *this;
@@ -94,10 +100,10 @@ Matrix& Matrix::operator=(const Matrix &other)
     cols = other.cols;
 
     //delete[] matrix;
-    double *temp = matrix;
+    T *temp = matrix;
 
     try{
-        matrix = new double[rows * cols];
+        matrix = new T[rows * cols];
         for(size_t i=0; i < rows*cols; ++i)
             matrix[i] = other.matrix[i];
         delete[] temp;
@@ -112,29 +118,32 @@ Matrix& Matrix::operator=(const Matrix &other)
 }
 
 
-Matrix::Matrix()
+template<typename T>
+Matrix<T>::Matrix()
 {
     rows = 0;
     cols = 0;
-    determinant = std::numeric_limits<double>::quiet_NaN();
+    determinant = std::numeric_limits<T>::quiet_NaN();
     matrix = nullptr;
 }
 
-Matrix::~Matrix()
+template<typename T>
+Matrix<T>::~Matrix()
 {
     delete[] matrix;
 
     matrix = nullptr;
 }
 
-Matrix::Matrix(const Matrix &other)
+template<typename T>
+Matrix<T>::Matrix(const Matrix<T> &other)
 {
     rows = other.rows;
     cols = other.cols;
     determinant = other.determinant;
 
     try{
-        matrix = new double[rows * cols];
+        matrix = new T[rows * cols];
 
         for(size_t i = 0; i < rows * cols; ++i)
                 matrix[i] = other.matrix[i];
@@ -145,14 +154,15 @@ Matrix::Matrix(const Matrix &other)
     }
 }
 
-Matrix::Matrix(size_t r, size_t c)
+template<typename T>
+Matrix<T>::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
-    determinant = std::numeric_limits<double>::quiet_NaN();
+    determinant = std::numeric_limits<T>::quiet_NaN();
 
     try{
-        matrix = new double[rows * cols];
+        matrix = new T[rows * cols];
         for(size_t i=0; i < rows * cols; ++i)
             matrix[i] = 0;
     }
@@ -163,9 +173,10 @@ Matrix::Matrix(size_t r, size_t c)
 }
 
 
-Matrix Matrix::Transposition() const
+template<typename T>
+Matrix<T> Matrix<T>::Transposition() const
 {
-    Matrix result = Matrix(rows, cols);
+    Matrix<T> result = Matrix<T>(rows, cols);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
             result(i, j) = (*this)(j, i); 
@@ -173,7 +184,8 @@ Matrix Matrix::Transposition() const
 }
 
 
-double Matrix::CalcDeterminant()
+template<typename T>
+T Matrix<T>::CalcDeterminant()
 {
     if (!std::isnan(determinant))
         return determinant;
@@ -183,7 +195,7 @@ double Matrix::CalcDeterminant()
     
 
     determinant = 1;
-    Matrix Triangular = (*this).GaussianMethod();
+    Matrix<T> Triangular = (*this).GaussianMethod();
     if (Triangular.matrix == nullptr)
         return (*this).MinorsMethod();
     for(size_t i=0; i < rows; ++i)
@@ -192,9 +204,10 @@ double Matrix::CalcDeterminant()
     return determinant;
 }
 
-Matrix Matrix::GaussianMethod() const
+template<typename T>
+Matrix<T> Matrix<T>::GaussianMethod() const
 {
-    Matrix result = Matrix(*this);
+    Matrix<T> result = Matrix<T>(*this);
     int determinant_ratio = 1;
     for (size_t k=0; k < rows; ++k)
     {
@@ -207,12 +220,12 @@ Matrix Matrix::GaussianMethod() const
                 determinant_ratio *= -1;
             }
             else
-                return Matrix();
+                return Matrix<T>();
         }
         
         for (size_t i=k+1; i < rows; ++i)
         {
-            double ratio = result(i, k) / result(k, k);
+            T ratio = result(i, k) / result(k, k);
             for (size_t j = 0; j < cols; ++j){
                 result(i, j) -= result(k, j) * ratio;
                 if (std::isnan(result(i, i))) //DEBUG
@@ -223,18 +236,20 @@ Matrix Matrix::GaussianMethod() const
     return result * determinant_ratio;
 }
 
-void Matrix::swapRows(size_t r_1, size_t r_2)
+template<typename T>
+void Matrix<T>::swapRows(size_t r_1, size_t r_2)
 {
     for(size_t i=0; i<cols; ++i){
-        double temp = (*this)(r_1, i);
+        T temp = (*this)(r_1, i);
         (*this)(r_1, i) = (*this)(r_2, i);
         (*this)(r_2, i) = temp;
     }
 }
 
-double Matrix::MinorsMethod() const
+template<typename T>
+T Matrix<T>::MinorsMethod() const
 {
-    double result = 0;
+    T result = 0;
     if (rows==2 && cols==2) return (*this)(0,0) * (*this)(1,1) - (*this)(0, 1) * (*this)(1, 0);
 
     for(size_t i=0; i < rows; ++i){
@@ -243,9 +258,10 @@ double Matrix::MinorsMethod() const
     return result;
 }
 
-Matrix Matrix::Minor(size_t i, size_t j) const
+template<typename T>
+Matrix<T> Matrix<T>::Minor(size_t i, size_t j) const
 {
-    Matrix result(rows-1, cols-1);
+    Matrix<T> result(rows-1, cols-1);
     bool flag_r = false;
     for(size_t r=0; r<rows-1; ++r){
         bool flag_c = false;
@@ -260,7 +276,8 @@ Matrix Matrix::Minor(size_t i, size_t j) const
 }
 
 
-void Matrix::FillMagickSE()
+template<typename T>
+void Matrix<T>::FillMagickSE()
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
@@ -272,7 +289,8 @@ void Matrix::FillMagickSE()
     }
 }
 
-void Matrix::FillMatrix()
+template<typename T>
+void Matrix<T>::FillMatrix()
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
@@ -283,7 +301,8 @@ void Matrix::FillMatrix()
         }
 }
 
-void Matrix::FillMatrixOp()
+template<typename T>
+void Matrix<T>::FillMatrixOp()
 {
     size_t cnt = rows * cols;
     for (size_t i = 0; i < rows; ++i)
@@ -295,7 +314,8 @@ void Matrix::FillMatrixOp()
 }
 
 
-void Matrix::WriteMatrix() const
+template<typename T>
+void Matrix<T>::WriteMatrix() const
 {
     std::cout << rows << ' ' << cols << std::endl;
 
@@ -307,7 +327,8 @@ void Matrix::WriteMatrix() const
 }
 
 
-void Matrix::ReadMatrix()
+template<typename T>
+void Matrix<T>::ReadMatrix()
 {
     size_t r, c;
     std::cin >> r >> c;
@@ -317,7 +338,7 @@ void Matrix::ReadMatrix()
         matrix = nullptr;
         rows = r;
         cols = c;
-        matrix = new double[rows * cols];
+        matrix = new T[rows * cols];
         }
     for(size_t i=0; i<rows; ++i)
         for(size_t j=0; j<cols; ++j)
@@ -325,7 +346,11 @@ void Matrix::ReadMatrix()
 }
 
 
-Matrix Matrix::AddMatrix(const Matrix &other) const
+template<typename T>
+Matrix<T> Matrix<T>::AddMatrix(const Matrix<T> &other) const
 {
     return *this + other;
 }
+
+
+Matrix<double>;
