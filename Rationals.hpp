@@ -21,6 +21,7 @@ class Rational
         Rational operator-(const Rational &other) const;
         Rational operator-() const;
         Rational operator*(const Rational &other) const;
+        Rational operator*(const long long int &other) const;
         Rational operator/(const Rational &other) const;
         
         Rational& operator=(const Rational &other);
@@ -29,7 +30,7 @@ class Rational
         bool operator>(const Rational &other) const {return (this->numerator * other.denomenator) > (this->denomenator * other.numerator);};
         bool operator==(const Rational &other) const {return (this->numerator * other.denomenator) == (this->denomenator * other.numerator);};
 
-        bool isNaN() const;
+        bool isNaN() const {return denomenator;};
         
         Rational operator++(int);
         Rational& operator++();
@@ -42,6 +43,7 @@ class Rational
             *this = *this + other;
             return *this;
         }
+
         template<typename T>
         Rational& operator-=(const T &other)
         {
@@ -49,11 +51,28 @@ class Rational
             return *this;
         }
         
-        //static operator int(Rational other);
+        template<typename T>
+        Rational& operator*=(const T &other)
+        {
+            *this = *this * other;
+            return *this;
+        }
+
+        template<typename T>
+        Rational& operator/=(const T &other)
+        {
+            *this = *this / other;
+            return *this;
+        }
+
         operator int() const {return numerator / denomenator;};
         operator double() const {return (double)numerator / (double)denomenator;};
 
         friend std::ostream& operator<<(std::ostream &out, const Rational &R);
 };
+
+size_t recursiveGCD(size_t n, size_t k);
+
+long long int binaryGCD(long long int n, long long int k);
 
 #endif

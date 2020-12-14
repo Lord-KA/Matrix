@@ -14,6 +14,7 @@ class Matrix
         size_t rows;
         size_t cols;
         T determinant;
+        bool determinantIsNaN;
 
         T *matrix;
 
@@ -88,7 +89,7 @@ template<typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
 {
     if(rows == other.rows && cols == other.cols){
-        Matrix<T> result = Matrix<T>(other);
+        Matrix result = Matrix(other);
         for(size_t i=0; i < rows * cols; ++i)
             result.matrix[i] += matrix[i];
         return result; 
@@ -113,10 +114,10 @@ template<typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
 {
     if(cols == other.rows){
-        Matrix<T> result = Matrix<T>(rows, cols);
+        Matrix result = Matrix(rows, cols);
         for(size_t i=0; i < rows; ++i)
             for(size_t j=0; j < cols; ++j){
-                size_t sum = 0;
+                T sum = 0;
                 for(size_t r=0; r < rows; ++r)
                     sum += (*this)(i, r) * other(r, j); 
                 result(i, j) = sum;
@@ -131,7 +132,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
 template<typename T>
 Matrix<T> Matrix<T>::operator*(const T &n) const
 {
-    Matrix<T> result = Matrix<T>(rows, cols);
+    Matrix result = Matrix(rows, cols);
     for(size_t i=0; i < rows * cols; ++i)
         result.matrix[i] = matrix[i] * n;
     return result;
@@ -147,7 +148,9 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
     rows = other.rows;
     cols = other.cols;
 
-    //delete[] matrix;
+    determinant = other.determinant;
+    determinantIsNaN = other.determinantIsNaN;
+
     T *temp = matrix;
 
     try{
@@ -171,7 +174,7 @@ Matrix<T>::Matrix()
 {
     rows = 0;
     cols = 0;
-    determinant = std::numeric_limits<T>::quiet_NaN();
+    determinantIsNaN = true;
     matrix = nullptr;
 }
 
@@ -189,6 +192,7 @@ Matrix<T>::Matrix(const Matrix<T> &other)
     rows = other.rows;
     cols = other.cols;
     determinant = other.determinant;
+    determinantIsNaN = other.determinantIsNaN;
 
     try{
         matrix = new T[rows * cols];
@@ -207,7 +211,7 @@ Matrix<T>::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
-    determinant = std::numeric_limits<T>::quiet_NaN();
+    determinantIsNaN = true;
 
     try{
         matrix = new T[rows * cols];
@@ -224,7 +228,7 @@ Matrix<T>::Matrix(size_t r, size_t c)
 template<typename T>
 Matrix<T> Matrix<T>::Transposition() const
 {
-    Matrix<T> result = Matrix<T>(rows, cols);
+    Matrix result = Matrix(rows, cols);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
             result(i, j) = (*this)(j, i); 
@@ -235,7 +239,7 @@ Matrix<T> Matrix<T>::Transposition() const
 template<typename T>
 T Matrix<T>::CalcDeterminant()
 {
-    if (!std::isnan(determinant))
+    if (!determinantIsNaN)
         return determinant;
     
     if (rows != cols) 
@@ -243,9 +247,12 @@ T Matrix<T>::CalcDeterminant()
     
 
     determinant = 1;
-    Matrix<T> Triangular = (*this).GaussianMethod();
-    if (Triangular.matrix == nullptr)
-        return (*this).MinorsMethod();
+    determinantIsNaN = false;
+    Matrix Triangular = (*this).GaussianMethod();
+    if (Triangular.matrix == nullptr){
+        determinant = (*this).MinorsMethod();
+        return determinant;
+    }
     for(size_t i=0; i < rows; ++i)
         determinant *= Triangular(i, i);
 
@@ -255,13 +262,13 @@ T Matrix<T>::CalcDeterminant()
 template<typename T>
 Matrix<T> Matrix<T>::GaussianMethod() const
 {
-    Matrix<T> result = Matrix<T>(*this);
+    Matrix result = Matrix(*this);
     int determinant_ratio = 1;
     for (size_t k=0; k < rows; ++k)
     {
-        if (result(k, k) == 0){
+        if (result(k, k) == T(0)){
             size_t i = k + 1;
-            while (i < cols && result(k, i) == 0)
+            while (i < cols && result(k, i) == T(0))
                 ++i;
             if (i != cols){
                 result.swapRows(k, i);
@@ -276,8 +283,6 @@ Matrix<T> Matrix<T>::GaussianMethod() const
             T ratio = result(i, k) / result(k, k);
             for (size_t j = 0; j < cols; ++j){
                 result(i, j) -= result(k, j) * ratio;
-                if (std::isnan(result(i, i))) //DEBUG
-                    std::cout << "Error: ratio in GaussianMethod is none; {result(i, i), ratio, result(k, j)} = " << result(i, i) << ' ' << ratio << ' ' << result(k, j) << std::endl;
             }
         }
     }
@@ -301,7 +306,7 @@ T Matrix<T>::MinorsMethod() const
     if (rows==2 && cols==2) return (*this)(0,0) * (*this)(1,1) - (*this)(0, 1) * (*this)(1, 0);
 
     for(size_t i=0; i < rows; ++i){
-        result += (*this)(0, i) * (i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
+        result += (*this)(0, i) * T(i%2==0?1:-1) * (*this).Minor(0, i).MinorsMethod();
     }
     return result;
 }
@@ -309,7 +314,7 @@ T Matrix<T>::MinorsMethod() const
 template<typename T>
 Matrix<T> Matrix<T>::Minor(size_t i, size_t j) const
 {
-    Matrix<T> result(rows-1, cols-1);
+    Matrix result(rows-1, cols-1);
     bool flag_r = false;
     for(size_t r=0; r<rows-1; ++r){
         bool flag_c = false;
