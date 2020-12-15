@@ -2,9 +2,7 @@
 #define MATRIX_h
 
 #include <iostream>
-#include <cstddef>
-#include <limits>
-#include <cmath>
+#include <cassert>
 
 template<typename T>
 class Matrix
@@ -26,12 +24,16 @@ class Matrix
 
         ~Matrix();
 
-        void FillMagickSE();
         void WriteMatrix() const;
         void ReadMatrix();
-        void FillMatrix();
-        void FillMatrixOp();
-        Matrix AddMatrix( const Matrix & other ) const;
+
+        void FillMagickSE(); // DEBUG
+        void FillMatrix();   // DEBUG
+        void FillMatrixOp(); // DEBUG
+        void FillRandom();   // DEBUG
+
+        T Random(); // DEBUG
+
         T CalcDeterminant();
         Matrix GaussianMethod() const;
         void swapRows(size_t i, size_t j);
@@ -42,9 +44,11 @@ class Matrix
 
         Matrix operator+( const Matrix & other ) const;
         Matrix operator-( const Matrix & other ) const;
+        Matrix operator-() const;
         Matrix operator*( const Matrix & other ) const;
         Matrix operator*( const T &n) const;
         Matrix& operator=( const Matrix & other );
+        Matrix& operator=( const T* other);
         
         T operator() (const size_t i, const size_t j) const; 
         T& operator() (const size_t i, const size_t j); 
@@ -88,45 +92,43 @@ T& Matrix<T>::operator() (const size_t i, const size_t j)
 template<typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
 {
-    if(rows == other.rows && cols == other.cols){
-        Matrix result = Matrix(other);
-        for(size_t i=0; i < rows * cols; ++i)
-            result.matrix[i] += matrix[i];
-        return result; 
-    }
-
-    std::cerr << "Error: summaring matrixes of different sizes." << std::endl;
-    exit(1);
+    assert(rows == other.rows && cols == other.cols);
+    
+    Matrix result = Matrix(other);
+    for(size_t i=0; i < rows * cols; ++i)
+        result.matrix[i] += matrix[i];
+    return result; 
 }
 
 template<typename T>
 Matrix<T> Matrix<T>::operator-(const Matrix<T> & other) const
 {
-    if(rows == other.rows && cols == other.cols)
-        return *this + -1 * other;
+    assert(rows == other.rows && cols == other.cols);
     
-    std::cerr << "Error: subtracting matrixes of different sizes." << std::endl;
-    exit(1);
+    return *this + -1 * other;
+}
+
+template<typename T>
+Matrix<T> Matrix<T>::operator-() const
+{
+    return -1 * (*this);
 }
 
 
 template<typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
 {
-    if(cols == other.rows){
-        Matrix result = Matrix(rows, cols);
-        for(size_t i=0; i < rows; ++i)
-            for(size_t j=0; j < cols; ++j){
-                T sum = 0;
-                for(size_t r=0; r < rows; ++r)
-                    sum += (*this)(i, r) * other(r, j); 
-                result(i, j) = sum;
-            }
-        return result;
-    }
-
-    std::cerr << "Error: bad input for multiplication." << std::endl;
-    exit(1);
+    assert(cols == other.rows);
+    
+    Matrix result = Matrix(rows, cols);
+    for(size_t i=0; i < rows; ++i)
+        for(size_t j=0; j < cols; ++j){
+            T sum = 0;
+            for(size_t r=0; r < rows; ++r)
+                sum += (*this)(i, r) * other(r, j); 
+            result(i, j) = sum;
+        }
+    return result;
 }
 
 template<typename T>
@@ -162,12 +164,29 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
     catch(...)
     {
         matrix = temp;
-        std::cerr << "Error: memory allocation has failed." << std::endl;
+     
+        assert(false);
     }
 
     return *this;
 }
 
+/* // TODO finish operator=(array)
+template<typename T>
+Matrix<T>& Matrix<T>::operator=( const T* other)
+{
+    size_t r = sizeof(*other) / sizeof(*other[0]);
+    size_t c = sizeof(*other[0]);
+    if (rows != r || cols != c)
+    {
+        
+    }
+
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; i < cols; ++j)
+            matrix[]
+}
+*/
 
 template<typename T>
 Matrix<T>::Matrix()
@@ -202,7 +221,7 @@ Matrix<T>::Matrix(const Matrix<T> &other)
     }
     catch(...)
     {
-        std::cerr << "Error: memory allocation has failed." << std::endl;
+        assert(false);
     }
 }
 
@@ -220,7 +239,7 @@ Matrix<T>::Matrix(size_t r, size_t c)
     }
     catch(...)
     {
-        std::cerr << "Error: memory allocation has failed." << std::endl;
+        assert(false);
     }
 }
 
@@ -366,6 +385,14 @@ void Matrix<T>::FillMatrixOp()
         }
 }
 
+template<typename T>
+void Matrix<T>::FillRandom()
+{
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            matrix(i, j) = Random(); // TODO write Random
+}
+
 
 template<typename T>
 void Matrix<T>::WriteMatrix() const
@@ -387,22 +414,23 @@ void Matrix<T>::ReadMatrix()
     std::cin >> r >> c;
     if (r != rows || c != cols)
     {
-        delete[] matrix;
-        matrix = nullptr;
-        rows = r;
-        cols = c;
-        matrix = new T[rows * cols];
+        T temp = matrix;
+        try{
+            matrix = new T[rows * cols];
+            rows = r;
+            cols = c;
         }
+        catch(...)
+        {
+            matrix = temp;
+            assert(false);
+        }
+    }
+
     for(size_t i=0; i<rows; ++i)
         for(size_t j=0; j<cols; ++j)
             std::cin >> (*this)(i, j);
 }
 
-
-template<typename T>
-Matrix<T> Matrix<T>::AddMatrix(const Matrix<T> &other) const
-{
-    return *this + other;
-}
 
 #endif
