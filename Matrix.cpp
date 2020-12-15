@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream &out, const Matrix &a)
 
 Matrix Matrix::operator+(const Matrix & other) const
 {
-    Matrix result = Matrix(rows, cols);
+    Matrix result = Matrix(*this);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
             result.data[i][j] += other.data[i][j];
@@ -75,7 +75,6 @@ Matrix::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
-    try{
     data = new double*[rows];
     for(size_t i=0; i < rows; ++i)
         data[i] = new double [cols];
@@ -83,12 +82,6 @@ Matrix::Matrix(size_t r, size_t c)
     for(size_t i=0; i<rows; ++i)
         for(size_t j=0; j<cols; ++j)
             data[i][j] = 0;
-    }
-    catch(...)
-    {
-        std::cerr << "Error has appeared while allocating memory!" << std::endl;
-        exit(1);
-    }
 }
 
 
@@ -97,27 +90,18 @@ void Matrix::FillMagickSE()
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j){
-            std::cout << cols << ' ' << i << ' ' << j <<'\n';
             if (cols <= j + i){
-                std::cout << '\n';
                 ++cnt;
                 data[i][j] = cnt;
             }
     }
-    std::cout << '\n';
 }
 
 
 void Matrix::WriteMatrix() const
 {
-    std::cout << rows << ' ' << cols << std::endl;
-
-    for (size_t i = 0; i < rows; ++i){
-        for (size_t j = 0; j < cols; ++j)
-            std::cout << data[i][j] << ' ';
-        std::cout << std::endl;
-    }
-}
+    std::cout << rows << ' ' << cols << std::endl << *this;
+}  
 
 
 Matrix Matrix::AddMatrix(const Matrix &other) const
