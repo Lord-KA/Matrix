@@ -65,8 +65,8 @@ class Rational
             return *this;
         }
 
-        operator int() const {return numerator / denomenator;};
-        operator double() const {return (double)numerator / (double)denomenator;};
+        explicit operator int() const {return numerator / denomenator;};
+        operator double() const {return static_cast<double>(numerator) / denomenator;};
 
         friend std::ostream& operator<<(std::ostream &out, const Rational &R);
 };

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cassert>
 
+class Rational;
+
 template<typename T>
 class Matrix
 {
@@ -392,6 +394,18 @@ void Matrix<T>::FillRandom()
         for (size_t j = 0; j < cols; ++j)
             matrix(i, j) = Random(); // TODO write Random
 }
+
+template<typename T>
+T Random()
+{
+    if (T* as = dynamic_cast<Rational>(as))
+        return random();
+    if (T* as = dynamic_cast<double>(as))
+        return random();
+    else
+        assert(false);
+}
+
 
 
 template<typename T>

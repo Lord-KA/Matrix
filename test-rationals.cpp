@@ -2,10 +2,10 @@
 
 int main()
 {
-    Rational a(1, 2), b(3, 4);
+    Rational a(1, 2), b(4, 3);
     std::cout << a + b << ' ' << a/b << ' ' << a - b << ' ' << a * b << std::endl;
-    for (int i=2000; i < 2020; ++i)
-        std::cout << Rational(i, 100) << std::endl;
+
+    std::cout << static_cast<double>(b) << std::endl;
 
     return 0;
 }
