@@ -2,6 +2,7 @@
 #define RATIONALS_HPP
 #include <iostream>
 #include <cstddef>
+#include <cmath>
 #include <random>
 
 class Rational

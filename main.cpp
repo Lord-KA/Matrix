@@ -41,5 +41,6 @@ int main()
     P_1.FillMatrixRandom();
     std::cout << P_1 << std::endl;
 
+    std::cout << P_1.CalcDeterminant() << std::endl;
     return 0;
 }

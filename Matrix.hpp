@@ -8,7 +8,7 @@
 #include "Rationals.hpp"
 
 
-const long long int INF = 1000000000000000; // Infty
+const long long int INF = 10000000000000000; 
 
 
 template<typename T>
@@ -55,7 +55,7 @@ class Matrix
         Matrix& operator=( const Matrix & other );
         Matrix& operator=( const T* other);
         
-        T operator() (const size_t i, const size_t j) const; 
+        T& operator() (const size_t i, const size_t j) const; 
         T& operator() (const size_t i, const size_t j); 
 
     friend std::ostream& operator<<(std::ostream &out, const Matrix &a)
@@ -81,7 +81,7 @@ class Matrix
 
 
 template<typename T>
-T Matrix<T>::operator() (const size_t i, const size_t j) const
+T& Matrix<T>::operator() (const size_t i, const size_t j) const
 {
     return matrix[i * cols + j];
 }
@@ -394,30 +394,20 @@ void Matrix<T>::FillMatrixOp()
         }
 }
 
-template<typename T>
-void Matrix<T>::FillMatrixRandom()
-{
-    for(size_t i = 0; i < rows; ++i)
-        for(size_t j = 0; j < cols; ++j){
-            using std::rand;
-            using Rationals::rand;
-            matrix(i, j) = Random(static_cast<T*>(nullptr)); 
-        }
-}
 
 long long int Random(int*)
 {
-   std::random_device r;
-   std::default_random_engine e1(r());
-   std::uniform_int_distribution<long long int> uniform_dist(-INF, INF);
+   static std::random_device r;
+   static std::default_random_engine e1(r());
+   static std::uniform_int_distribution<long long int> uniform_dist(-INF, INF);
    return uniform_dist(e1);
 }
 
 double Random(double*)
 {
-    std::random_device r;
-    std::default_random_engine e1(r());
-    std::uniform_real_distribution<double> uniform_dist(-INF, INF);
+    static std::random_device r;
+    static std::default_random_engine e1(r());
+    static std::uniform_real_distribution<double> uniform_dist(-INF, INF);
     return uniform_dist(e1);
 }
 
@@ -430,6 +420,17 @@ template<typename T>
 Matrix<T> Random(Matrix<T>*)
 {
     return Random(static_cast<T*>(nullptr));
+}
+
+template<typename T>
+void Matrix<T>::FillMatrixRandom()
+{
+    for(size_t i = 0; i < rows; ++i)
+        for(size_t j = 0; j < cols; ++j){
+            using std::rand;
+            using Rationals::rand;
+            (*this)(i, j) = Random(static_cast<T*>(nullptr)); // rand() is overloaded in all types/classes used in Matrix
+        }
 }
 
 
