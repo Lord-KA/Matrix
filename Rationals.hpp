@@ -2,7 +2,7 @@
 #define RATIONALS_HPP
 #include <iostream>
 #include <cstddef>
-
+#include <random>
 
 class Rational
 {
@@ -71,8 +71,13 @@ class Rational
         friend std::ostream& operator<<(std::ostream &out, const Rational &R);
 };
 
-size_t recursiveGCD(size_t n, size_t k);
 
-long long int binaryGCD(long long int n, long long int k);
+namespace Rationals
+{
+    size_t recursiveGCD(size_t n, size_t k);
 
+    long long int binaryGCD(long long int n, long long int k);
+    
+    Rational rand();
+}
 #endif

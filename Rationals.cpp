@@ -1,5 +1,7 @@
 #include "Rationals.hpp"
 
+const long long int INF = 1000000000000000;
+
 long long int abs(long long int n) {return (n<0)?-n:n;};
 
 Rational::Rational()
@@ -161,3 +163,15 @@ Rational Rational::Simplify()
     this->denomenator /=GCD;
     return (*this);
 }
+
+
+Rational Rationals::rand()
+{
+    std::random_device r;
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<long long int> uniform_dist(-INF, INF);
+    Rational result(uniform_dist(e1), uniform_dist(e1));
+
+    return result;
+}
+

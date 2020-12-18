@@ -3,9 +3,8 @@
 int main()
 {
     Rational a(1, 2), b(4, 3);
-    std::cout << a + b << ' ' << a/b << ' ' << a - b << ' ' << a * b << std::endl;
-
-    std::cout << static_cast<double>(b) << std::endl;
+    a = Rationals::rand();
+    std::cout << static_cast<double>(a) << std::endl;
 
     return 0;
 }

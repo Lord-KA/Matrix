@@ -37,5 +37,9 @@ int main()
     std::cout << ((W_4.CalcDeterminant() == W_4.MinorsMethod())) << std::endl;
     std::cout << "@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
 
+    Matrix<double> P_1(r, c);
+    P_1.FillMatrixRandom();
+    std::cout << P_1 << std::endl;
+
     return 0;
 }
