@@ -5,6 +5,8 @@
 #include <cmath>
 #include <random>
 
+const long long int INF = 10000000;
+
 class Rational
 {
     private:
@@ -79,6 +81,13 @@ namespace Rationals
 
     long long int binaryGCD(long long int n, long long int k);
     
-    Rational rand();
+    template<typename Rational> Rational Random()
+    {
+        static std::random_device r;  
+        static std::default_random_engine e1(r());  
+        static std::uniform_int_distribution<long long int> uniform_dist(-INF, INF);  
+        Rational result(uniform_dist(e1), uniform_dist(e1));  
+        return result;                                            
+    }
 }
 #endif

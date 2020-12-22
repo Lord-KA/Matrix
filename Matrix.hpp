@@ -8,9 +8,6 @@
 #include "Rationals.hpp"
 
 
-const long long int INF = 10000000000000000; 
-
-
 template<typename T>
 class Matrix
 {
@@ -395,31 +392,13 @@ void Matrix<T>::FillMatrixOp()
 }
 
 
-long long int Random(int*)
+template<typename T>
+T Random()
 {
    static std::random_device r;
    static std::default_random_engine e1(r());
-   static std::uniform_int_distribution<long long int> uniform_dist(-INF, INF);
+   static std::uniform_int_distribution<T> uniform_dist(-INF, INF);
    return uniform_dist(e1);
-}
-
-double Random(double*)
-{
-    static std::random_device r;
-    static std::default_random_engine e1(r());
-    static std::uniform_real_distribution<double> uniform_dist(-INF, INF);
-    return uniform_dist(e1);
-}
-
-Rational Random(Rational*)
-{
-    return Rationals::rand();
-}
-
-template<typename T>
-Matrix<T> Random(Matrix<T>*)
-{
-    return Random(static_cast<T*>(nullptr));
 }
 
 template<typename T>
@@ -427,9 +406,8 @@ void Matrix<T>::FillMatrixRandom()
 {
     for(size_t i = 0; i < rows; ++i)
         for(size_t j = 0; j < cols; ++j){
-            using std::rand;
-            using Rationals::rand;
-            (*this)(i, j) = Random(static_cast<T*>(nullptr)); // rand() is overloaded in all types/classes used in Matrix
+            using Rationals::Random;
+            (*this)(i, j) = Random<T>(); 
         }
 }
 
