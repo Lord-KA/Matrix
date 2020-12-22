@@ -34,6 +34,8 @@ class Matrix
         void FillMagickSE(); // DEBUG
         void FillMatrix();   // DEBUG
         void FillMatrixOp(); // DEBUG
+
+        template<typename RandGen=Random<T>>
         void FillMatrixRandom();   // DEBUG
 
         T CalcDeterminant();
