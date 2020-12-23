@@ -5,7 +5,7 @@
 #include <cassert>
 #include <random>
 
-#include "Rationals.hpp"
+const long int INF = 1e6;
 
 
 template<typename T>
@@ -35,7 +35,7 @@ class Matrix
         void FillMatrix();   // DEBUG
         void FillMatrixOp(); // DEBUG
 
-        void FillMatrixRandom(T (*Random)());   // DEBUG
+        void FillMatrixRandom(T (*CustomRandom)());   // DEBUG
         void FillMatrixRandom();   // DEBUG
 
         T CalcDeterminant();
@@ -394,7 +394,6 @@ void Matrix<T>::FillMatrixOp()
 }
 
 
-
 template<typename T>
 T Random()
 {
@@ -418,7 +417,7 @@ void Matrix<T>::FillMatrixRandom(T (*CustomRandom)())
 {
     for(size_t i = 0; i < rows; ++i)
         for(size_t j = 0; j < cols; ++j){
-            (*this)(i, j) = CustomRandom(); 
+            (*this)(i, j) = (*CustomRandom)(); 
         }
 }
 

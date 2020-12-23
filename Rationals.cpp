@@ -162,3 +162,12 @@ Rational Rational::Simplify()
     this->denomenator /=GCD;
     return (*this);
 }
+
+Rational Rationals::Random()
+{
+    static std::random_device r;  
+    static std::default_random_engine e1(r());  
+    static std::uniform_int_distribution<int> uniform_dist(-1e4, 1e4);  
+    Rational result(uniform_dist(e1), uniform_dist(e1));  
+    return result;                                            
+}
