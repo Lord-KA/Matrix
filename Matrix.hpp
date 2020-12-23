@@ -7,6 +7,14 @@
 
 #include "Rationals.hpp"
 
+template<typename T>
+T Random()
+{
+    std::random_device r;
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<T> uniform_dist(-INF, INF);
+    return uniform_dist(e1);
+}
 
 template<typename T>
 class Matrix
@@ -35,8 +43,7 @@ class Matrix
         void FillMatrix();   // DEBUG
         void FillMatrixOp(); // DEBUG
 
-        template<typename RandGen=Random<T>>
-        void FillMatrixRandom();   // DEBUG
+        void FillMatrixRandom(Random<T>(*T));   // DEBUG
 
         T CalcDeterminant();
         Matrix GaussianMethod() const;
@@ -395,20 +402,11 @@ void Matrix<T>::FillMatrixOp()
 
 
 template<typename T>
-T Random()
-{
-   static std::random_device r;
-   static std::default_random_engine e1(r());
-   static std::uniform_int_distribution<T> uniform_dist(-INF, INF);
-   return uniform_dist(e1);
-}
-
-template<typename T>
-void Matrix<T>::FillMatrixRandom()
+void Matrix<T>::FillMatrixRandom(Random<T>(*T))
 {
     for(size_t i = 0; i < rows; ++i)
         for(size_t j = 0; j < cols; ++j){
-            using Rationals::Random;
+            //using Rationals::Random;
             (*this)(i, j) = Random<T>(); 
         }
 }
