@@ -5,7 +5,7 @@
 #include <cassert>
 #include <random>
 
-const long int INF = 1e6;
+const long int INF = 1e2;
 
 
 template<typename T>
@@ -173,24 +173,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 
     return *this;
 }
-
-
-/*
-template<typename T>  // TODO finish operator=(array)
-Matrix<T>& Matrix<T>::operator=( const T* other)
-{
-    size_t r = sizeof(*other) / sizeof(*other[0]);
-    size_t c = sizeof(*other[0]);
-    if (rows != r || cols != c)
-    {
-        
-    }
-
-    for (size_t i = 0; i < rows; ++i)
-        for (size_t j = 0; i < cols; ++j)
-            matrix[]
-}
-*/
 
 
 template<typename T>
@@ -408,7 +390,7 @@ double Random()
 {
     static std::random_device r;
     static std::default_random_engine e1(r());
-    std::uniform_real_distribution<double> uniform_dist(-INF, INF);
+    static std::uniform_real_distribution<double> uniform_dist(-INF, INF);
     return uniform_dist(e1);
 }
 

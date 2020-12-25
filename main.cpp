@@ -1,6 +1,8 @@
 #include "Matrix.hpp"
 #include "Rationals.hpp"
 
+double abs(double one) {return (1?one>0:-1) * one;};
+
 int main()
 {
     size_t r = 4, c = 4;
@@ -42,5 +44,26 @@ int main()
     std::cout << P_1 << std::endl;
 
     std::cout << P_1.CalcDeterminant() << std::endl;
+
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+
+    int counter = 0;
+    for (int i = 0; i < 10; ++i)
+    {
+        Matrix<double> Auto(r, c);
+        Auto.FillMatrixRandom();
+        if (abs(Auto.CalcDeterminant() - Auto.MinorsMethod()) > 1e-4){
+            std::cout << "Miss" << std::endl;
+            counter += 1;
+        }
+        else
+            std::cout << "Ok" << std::endl;
+
+    }
+    std::cout << counter << std::endl;
+
+
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+    
     return 0;
 }
