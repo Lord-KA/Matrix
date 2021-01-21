@@ -4,7 +4,7 @@ int main()
 {
     
     size_t r = 8, c = 3;
-    Matrix M(r, c);
+    Matrix<double> M(r, c);
     M.FillMagickSE();
     M.ReadMatrix();
     std::cout << std::endl;

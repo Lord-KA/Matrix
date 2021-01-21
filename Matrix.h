@@ -1,48 +1,42 @@
-/* Аудиторная работа №4 23-28 11.2020 */
-
-#ifndef  Matrix_h
-#define  Matrix_h
-
-// Аудиторная работа №6 7-12 12.2020
-//#include <cstddef>
 #include <ostream>
 
-struct Matrix
+template <typename T> class Matrix;
+
+template <typename T>
+std::ostream & operator<< ( std::ostream & left, const Matrix<T> & right );
+
+template <typename T>
+Matrix<T> operator* ( T left, const Matrix<T> & right );
+
+template <typename T> 
+class Matrix
 {
+ private:
   size_t rows; //количество строк
   size_t cols; //количество столбцов
   
-  double **data; //элементы матрицы
+  T **data; //элементы матрицы
   
+ public:
   Matrix(size_t rows, size_t cols);
   
   void WriteMatrix() const ; //вывод числа строк, столбцов, элементов
   
-  void FillMagick();   // DEBUG
-  
-  void FillMagickNE(); // 203
-  void FillMagickSW(); // 204
-  void FillMagickNW(); // 202
   void FillMagickSE(); // 201
-  void FillMagickDD(); // 205
   
-  /* Аудиторная работа №5 30-5 11-12.2020 */
   Matrix();
  ~Matrix();
-  Matrix(const Matrix & other);
+  Matrix(const Matrix<T> & other);
   
-  Matrix AddMatrix(const Matrix & other) const;
+  Matrix<T> AddMatrix(const Matrix<T> & other) const;
   
-  /* Аудиторная работа №6 7-12 12.2020 */
   void ReadMatrix();
 
-  Matrix operator+ ( const Matrix & right ) const;
-  Matrix operator- ( const Matrix & right ) const;
+  Matrix<T> operator+ ( const Matrix<T> & right ) const;
+  Matrix<T> operator- ( const Matrix<T> & right ) const;
+
+  friend std::ostream & operator<< <T>( std::ostream & left, const Matrix<T> & right );
+  friend Matrix<T> operator* <T>( T left, const Matrix<T> & right );
 };
 
-/* Аудиторная работа №6 7-12 12.2020 */
-std::ostream & operator<< ( std::ostream & left, const Matrix & right );
-
-Matrix operator* ( double left, const Matrix & right );
-
-#endif //Matrix_h
+#include "Matrix.cpp"

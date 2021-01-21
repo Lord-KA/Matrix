@@ -1,8 +1,7 @@
-#include "Matrix.h"
-
 #include <iostream>
 
-std::ostream& operator<<(std::ostream &out, const Matrix &a)
+template<typename T>
+std::ostream& operator<<(std::ostream &out, const Matrix<T> &a)
 {
     for (size_t i=0; i < a.rows; ++i){
         for (size_t j=0; j < a.cols; ++j)
@@ -13,31 +12,35 @@ std::ostream& operator<<(std::ostream &out, const Matrix &a)
 }
 
 
-Matrix Matrix::operator+(const Matrix & other) const
+template<typename T>
+Matrix<T> Matrix::operator+(const Matrix<T> & other) const
 {
-    Matrix result = Matrix(*this);
+    Matrix<T> result = Matrix<T>(*this);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
             result.data[i][j] += other.data[i][j];
     return result;
 }
 
-Matrix operator*(double N, const Matrix & right) 
+template<typename T>
+Matrix<T> operator*(T N, const Matrix<T> & right) 
 {
-    Matrix result = Matrix(right);
+    Matrix<T> result = Matrix<T>(right);
     for(size_t i=0; i < right.rows; ++i)
         for(size_t j=0; j < right.cols; ++j)
             result.data[i][j] *= N;
     return result;
 }
 
-Matrix Matrix::operator-(const Matrix & other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator-(const Matrix<T> & other) const
 {
     return *this + -1 * other;
 }
 
 
-Matrix::Matrix()
+template<typename T>
+Matrix<T>::Matrix()
 {
     rows = 0;
     cols = 0;
@@ -46,7 +49,8 @@ Matrix::Matrix()
 }
 
 
-Matrix::~Matrix()
+template<typename T>
+Matrix<T>::~Matrix()
 {  
     if (data != nullptr){
         for (size_t i = 0; i < rows; ++i)
@@ -57,27 +61,29 @@ Matrix::~Matrix()
 }
 
 
-Matrix::Matrix(const Matrix &other)
+template<typename T>
+Matrix<T>::Matrix(const Matrix<T> &other)
 {
     rows = other.rows;
     cols = other.cols;
-    data = new double*[rows];
+    data = new T*[rows];
 
     for(size_t i = 0; i < rows; ++i)
     {
-        data[i] = new double[cols];
+        data[i] = new T[cols];
         for(size_t j = 0; j < cols; ++j)
             data[i][j] = other.data[i][j];
     }
 }
 
-Matrix::Matrix(size_t r, size_t c)
+template<typename T>
+Matrix<T>::Matrix(size_t r, size_t c)
 {
     rows = r;
     cols = c;
-    data = new double*[rows];
+    data = new T*[rows];
     for(size_t i=0; i < rows; ++i)
-        data[i] = new double [cols];
+        data[i] = new T[cols];
 
     for(size_t i=0; i<rows; ++i)
         for(size_t j=0; j<cols; ++j)
@@ -85,7 +91,8 @@ Matrix::Matrix(size_t r, size_t c)
 }
 
 
-void Matrix::FillMagickSE()
+template<typename T>
+void Matrix<T>::FillMagickSE()
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
@@ -98,19 +105,22 @@ void Matrix::FillMagickSE()
 }
 
 
-void Matrix::WriteMatrix() const
+template<typename T>
+void Matrix<T>::WriteMatrix() const
 {
     std::cout << rows << ' ' << cols << std::endl << *this;
 }  
 
 
-Matrix Matrix::AddMatrix(const Matrix &other) const
+template<typename T>
+Matrix Matrix<T>::AddMatrix(const Matrix<T> &other) const
 {
     return *this + other;
 }
 
 
-void Matrix::ReadMatrix()
+template<typename T>
+void Matrix<T>::ReadMatrix()
 {
     size_t r, c;
     std::cin >> r >> c;
@@ -124,9 +134,9 @@ void Matrix::ReadMatrix()
         }
         rows = r;
         cols = c;
-        data = new double*[rows];
+        data = new T*[rows];
         for(size_t i=0; i < rows; ++i)
-            data[i] = new double [cols];
+            data[i] = new T [cols];
     }
     for(size_t i=0; i<rows; ++i)
 	    for(size_t j=0; j<cols; ++j)
