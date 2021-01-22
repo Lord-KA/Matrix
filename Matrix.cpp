@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream &out, const Matrix<T> &a)
 
 
 template<typename T>
-Matrix<T> Matrix::operator+(const Matrix<T> & other) const
+Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
 {
     Matrix<T> result = Matrix<T>(*this);
     for(size_t i=0; i < rows; ++i)
@@ -113,7 +113,7 @@ void Matrix<T>::WriteMatrix() const
 
 
 template<typename T>
-Matrix Matrix<T>::AddMatrix(const Matrix<T> &other) const
+Matrix<T> Matrix<T>::AddMatrix(const Matrix<T> &other) const
 {
     return *this + other;
 }

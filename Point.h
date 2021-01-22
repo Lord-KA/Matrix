@@ -1,7 +1,7 @@
 #ifndef  Point_h
 #define  Point_h
 
-#include <ostream>
+#include <iostream>
 
 class Point;
 
@@ -14,7 +14,7 @@ class Point
  
  public:
   Point(); //(0,0)
-  Point(size_t i); //(i,i)
+  //Point(size_t i); //(i,i)
   Point(double d); //(d,d)
   Point(double x, double y); //(x,y)
 
