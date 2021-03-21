@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 #include <random>
+#include <utility>
 
 const long int INF = 1e2;
 
@@ -22,9 +23,10 @@ class Matrix
 
 
     public:
-        Matrix();
+        Matrix() = default;
         Matrix( size_t rows, size_t cols);
         Matrix( const Matrix & other);
+        Matrix( Matrix&& other);
 
         ~Matrix();
 
@@ -36,7 +38,7 @@ class Matrix
         void FillMatrixOp(); // DEBUG
 
         void FillMatrixRandom(T (*CustomRandom)());   // DEBUG
-        void FillMatrixRandom();   // DEBUG
+        void FillMatrixRandom();                      // DEBUG
 
         T CalcDeterminant();
         Matrix GaussianMethod() const;
@@ -52,6 +54,7 @@ class Matrix
         Matrix operator*( const Matrix & other ) const;
         Matrix operator*( const T &n) const;
         Matrix& operator=( const Matrix & other );
+        Matrix& operator=( Matrix&& other);
         Matrix& operator=( const T* other);
         
         T& operator() (const size_t i, const size_t j) const; 
@@ -145,6 +148,18 @@ Matrix<T> Matrix<T>::operator*(const T &n) const
 
 
 template<typename T>
+Matrix<T>& Matrix<T>::operator=( Matrix&& other)
+{
+    if(this == &other)
+        return *this;
+    delete matrix;
+    matrix = std::exchange(other.matrix, nullptr);
+    rows = std::exchange(other.rows, 0);
+    cols = std::exchange(other.cols, 0);
+    return *this;
+}
+
+template<typename T>
 Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 {
     if (this == &other)
@@ -176,15 +191,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 
 
 template<typename T>
-Matrix<T>::Matrix()
-{
-    rows = 0;
-    cols = 0;
-    determinantIsNaN = true;
-    matrix = nullptr;
-}
-
-template<typename T>
 Matrix<T>::~Matrix()
 {
     delete[] matrix;
@@ -210,6 +216,14 @@ Matrix<T>::Matrix(const Matrix<T> &other)
     {
         assert(false);
     }
+}
+
+template<typename T>
+Matrix<T>::Matrix( Matrix&& other)
+{
+    matrix = std::exchange(other.matrix, nullptr);
+    rows = std::exchange(other.rows, 0);
+    cols = std::exchange(other.cols, 0);
 }
 
 template<typename T>
@@ -322,10 +336,10 @@ template<typename T>
 Matrix<T> Matrix<T>::Minor(size_t i, size_t j) const
 {
     Matrix result(rows-1, cols-1);
-    bool flag_row = false; // flag for skipping r = i
+    bool flag_row = false; // flag for skipping r == i
 
     for(size_t r=0; r<rows-1; ++r){
-        bool flag_col = false; // flag for skipping c = j for every r
+        bool flag_col = false; // flag for skipping c = j every r
 
         for(size_t c=0; c<cols-1; ++c){
             if (r == i) flag_row = true;
@@ -339,7 +353,7 @@ Matrix<T> Matrix<T>::Minor(size_t i, size_t j) const
 
 
 template<typename T>
-void Matrix<T>::FillMagickSE()
+void Matrix<T>::FillMagickSE() // Funcs to fill matrix in a weird way for testing purposes
 {
     size_t cnt = 0;
     for (size_t i = 0; i < rows; ++i)
