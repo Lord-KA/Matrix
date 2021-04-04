@@ -1,7 +1,7 @@
 #include "Matrix.hpp"
 #include "Rationals.hpp"
 
-double abs(double one) {return (1?one>0:-1) * one;};
+double abs(double one) {return (1?one>0:-1) * one;}
 
 int main()
 {
@@ -40,7 +40,7 @@ int main()
     std::cout << "@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
 
     Matrix<Rational> P_1(r, c);
-    P_1.FillMatrixRandom(*Rationals::Random);
+    P_1.FillMatrixRandom(*Rational::Random);
     std::cout << P_1 << std::endl;
 
     std::cout << P_1.CalcDeterminant() << std::endl;

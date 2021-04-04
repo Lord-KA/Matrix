@@ -71,15 +71,11 @@ class Rational
         operator double() const {return static_cast<double>(numerator) / denomenator;};
 
         friend std::ostream& operator<<(std::ostream &out, const Rational &R);
-};
+        
+        static size_t recursiveGCD(size_t n, size_t k);
 
-
-namespace Rationals
-{
-    size_t recursiveGCD(size_t n, size_t k);
-
-    long long int binaryGCD(long long int n, long long int k);
+        static long long int binaryGCD(long long int n, long long int k);
     
-    Rational Random();
-}
+        static Rational Random();
+};
 #endif

@@ -1,6 +1,6 @@
 #include "Rationals.hpp"
 
-long long int abs(long long int n) {return (n<0)?-n:n;};
+long long int abs(long long int n) {return (n<0)?-n:n;}
 
 
 Rational::Rational()
@@ -118,7 +118,7 @@ std::ostream& operator<<(std::ostream &out, const Rational &R)
 }
 
 
-long long int binaryGCD(long long int n, long long int k)
+long long int Rational::binaryGCD(long long int n, long long int k)
 {
     if (n == 0) return k;
     if (k == 0) return n;
@@ -138,11 +138,11 @@ long long int binaryGCD(long long int n, long long int k)
     return n << shift;   
 }
 
-size_t recurciveGCD(size_t n, size_t k)
+size_t Rational::recursiveGCD(size_t n, size_t k)
 {
     if (n == 0) return k;
     if (k == 0) return n;
-    return recurciveGCD(k, n % k);
+    return Rational::recursiveGCD(k, n % k);
 }
 
 
@@ -155,15 +155,15 @@ Rational Rational::Simplify()
     }
     long long int GCD;
     if (abs(denomenator) + abs(numerator) < 2000)
-        GCD = binaryGCD(abs(denomenator), abs(numerator));
+        GCD = Rational::binaryGCD(abs(denomenator), abs(numerator));
     else
-        GCD = recurciveGCD(abs(denomenator), abs(numerator));
+        GCD = Rational::recursiveGCD(abs(denomenator), abs(numerator));
     this->numerator /= GCD;
     this->denomenator /=GCD;
     return (*this);
 }
 
-Rational Rationals::Random()
+Rational Rational::Random()
 {
     static std::random_device r;  
     static std::default_random_engine e1(r());  
