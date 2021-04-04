@@ -125,12 +125,13 @@ template<typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
 {
     assert(cols == other.rows);
-    
-    Matrix result(rows, cols);
+
+
+    Matrix result(rows, other.cols);
     for(size_t i=0; i < rows; ++i)
-        for(size_t j=0; j < cols; ++j){
+        for(size_t j=0; j < other.cols; ++j){
             T sum = 0;
-            for(size_t r=0; r < rows; ++r)
+            for(size_t r=0; r < cols; ++r)
                 sum += (*this)(i, r) * other(r, j); 
             result(i, j) = sum;
         }
@@ -148,14 +149,18 @@ Matrix<T> Matrix<T>::operator*(const T &n) const
 
 
 template<typename T>
-Matrix<T>& Matrix<T>::operator=( Matrix&& other)
+Matrix<T>& Matrix<T>::operator=(Matrix&& other)
 {
     if(this == &other)
         return *this;
-    delete matrix;
+    delete[] matrix;
     matrix = std::exchange(other.matrix, nullptr);
     rows = std::exchange(other.rows, 0);
     cols = std::exchange(other.cols, 0);
+
+    determinantIsNaN = other.determinantIsNaN;
+    determinant = other.determinant;
+
     return *this;
 }
 
@@ -224,14 +229,16 @@ Matrix<T>::Matrix( Matrix&& other)
     matrix = std::exchange(other.matrix, nullptr);
     rows = std::exchange(other.rows, 0);
     cols = std::exchange(other.cols, 0);
+    determinantIsNaN = other.determinantIsNaN;
+    determinant = other.determinantIsNaN;
 }
 
 template<typename T>
-Matrix<T>::Matrix(size_t r, size_t c)
+Matrix<T>::Matrix(size_t r, size_t c) : rows(r), cols(c), determinantIsNaN(true), determinant(0)
 {
-    rows = r;
-    cols = c;
-    determinantIsNaN = true;
+    //rows = r;
+    //cols = c;
+    //determinantIsNaN = true;
 
     try{
         matrix = new T[rows * cols];
@@ -248,10 +255,10 @@ Matrix<T>::Matrix(size_t r, size_t c)
 template<typename T>
 Matrix<T> Matrix<T>::Transposition() const
 {
-    Matrix result = Matrix(rows, cols);
+    Matrix result = Matrix(cols, rows);
     for(size_t i=0; i < rows; ++i)
         for(size_t j=0; j < cols; ++j)
-            result(i, j) = (*this)(j, i); 
+            result(j, i) = (*this)(i, j); 
     return result;
 }
 

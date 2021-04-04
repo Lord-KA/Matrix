@@ -1,6 +1,6 @@
 #include "Rationals.hpp"
 
-long long int abs(long long int n) {return (n<0)?-n:n;}
+static long long int abs(long long int n) {return (n<0)?-n:n;}
 
 
 Rational::Rational()
@@ -167,7 +167,7 @@ Rational Rational::Random()
 {
     static std::random_device r;  
     static std::default_random_engine e1(r());  
-    static std::uniform_int_distribution<int> uniform_dist(-1e4, 1e4);  
+    static std::uniform_int_distribution<int> uniform_dist(-1e2, 1e2);  
     Rational result(uniform_dist(e1), uniform_dist(e1));  
     return result;                                            
 }

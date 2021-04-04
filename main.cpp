@@ -1,7 +1,7 @@
 #include "Matrix.hpp"
 #include "Rationals.hpp"
 
-double abs(double one) {return (1?one>0:-1) * one;}
+static double abs(double one) {return (1?one>0:-1) * one;}
 
 int main()
 {
@@ -26,7 +26,7 @@ int main()
     W_2.FillMagickSE();
     W_3.FillMatrixOp();
     W_4.FillMatrix();
-    W_4 = 14 * W_4;
+    W_4 = W_4 * 14;
     
     //std::cout << W_1.CalcDeterminant() << std::endl;
     //std::cout << W_2.CalcDeterminant() << std::endl;
