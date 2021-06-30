@@ -7,7 +7,7 @@
 
 #include "treap.hpp"
 
-#include "Matrix.hpp" //DEBUG
+#include "../Matrix.hpp" //DEBUG
 
 template<typename T>
 class SPMatrix{                                            //TODO fix cleanUp; 

@@ -1,4 +1,4 @@
-#include "Matrix.hpp"
+#include "../Matrix.hpp"
 #include <random>
 #include <gtest/gtest.h>
 

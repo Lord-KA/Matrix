@@ -1,5 +1,5 @@
 #include "spmatrix.hpp"
-#include "Matrix.hpp"
+#include "../Matrix.hpp"
 
 #include <gtest/gtest.h>
 
