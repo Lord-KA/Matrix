@@ -7,11 +7,17 @@ std::mt19937 rnd(179);
 constexpr size_t n = 2;
 constexpr size_t k = 17;
 
-constexpr size_t multiplicationLim = 100;
-constexpr size_t subtractionLim = 10000;
+constexpr size_t multiplicationLim = 2000;
+constexpr size_t subtractionLim = 4000;
 constexpr size_t passes = 100;
 constexpr size_t passesSum = 10;
 
+TEST(Manual, Basic)
+{
+    Matrix<int> M1(10, 10);
+    M1.FillMatrixRandom();
+    //std::cout << M1 << '\n';
+}
 
 TEST(Multiplication, RandomSquares) {
     for(int i = 0; i < passes; ++i){
@@ -97,7 +103,7 @@ TEST(Summing, RandomMultiplByConst) {
 
 TEST(Other, Transposing) {
     for(int i = 0; i < passes; ++i){
-        int a = rnd() % subtractionLim + 3, b = rnd() % subtractionLim + 3;
+        int a = rnd() % multiplicationLim + 3, b = rnd() % multiplicationLim + 3;
         Matrix<int> M1(a, b), M2(a, b), M3;
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
