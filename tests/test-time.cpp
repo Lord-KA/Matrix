@@ -14,8 +14,11 @@ constexpr size_t passesSum = 10;
 
 TEST(Manual, Basic)
 {
-    Matrix<int> M1(10, 10);
+    Matrix<int> M1(10, 10), M2(10, 10), M3;
     M1.FillMatrixRandom();
+    M2.FillMatrixRandom();
+    
+    M3 = M1 * M2;
     //std::cout << M1 << '\n';
 }
 

@@ -10,7 +10,7 @@
 #ifndef NTHREADS
 #include "pthread.h"
 
-constexpr size_t split = 7e5;           // the best test-time results from tested values of 1e5, 5e5, 7e5, 1e6, 5e6
+// constexpr size_t split = 7e5;           // the best test-time results from tested values of 1e5, 5e5, 7e5, 1e6, 5e6
 constexpr size_t threadNum = 8;
 #endif
 
@@ -108,17 +108,18 @@ class Matrix
 template<typename T>
 struct Matrix<T>::threadArgs
 {
-    threadArgs() : i(0), val(nullptr), this_(nullptr), other_(nullptr), result_(nullptr) {}
+    threadArgs() : beg(0), end(0), val(nullptr), this_(nullptr), other_(nullptr), result_(nullptr) {}
 
-    threadArgs(size_t i, const Matrix* this_, const Matrix* other_, const Matrix* result_, T (*random_)() = nullptr)
-        : i(i), this_(this_), other_(other_), result_(result_), random_(random_) {}
+    threadArgs(size_t beg, size_t end, const Matrix* this_, const Matrix* other_, const Matrix* result_, T (*random_)() = nullptr)
+        : beg(beg), end(end), this_(this_), other_(other_), result_(result_), random_(random_) {}
 
-    threadArgs(size_t i, const T* val, const Matrix* this_, const Matrix* other_, const Matrix* result_)
-        : i(i), val(val), this_(this_), other_(other_), result_(result_) {}
+    threadArgs(size_t beg, size_t end, const T* val, const Matrix* this_, const Matrix* other_, const Matrix* result_)
+        : beg(beg), end(end), val(val), this_(this_), other_(other_), result_(result_) {}
 
     threadArgs& operator=(const threadArgs& other)
     {
-        i = other.i;
+        beg = other.beg;
+        end = other.end;
         val = other.val;
         this_ = other.this_;
         other_ = other.other_;
@@ -128,7 +129,7 @@ struct Matrix<T>::threadArgs
         return *this;
     }
 
-    size_t i;
+    size_t beg, end;
     const T* val;
     const Matrix* this_;
     const Matrix* other_;
@@ -141,10 +142,12 @@ template<typename T>
 void* Matrix<T>::multiplicationThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
+    size_t lim_i = std::min(args->end, args->this_->rows);
 
-    for(size_t j=0; j < args->other_->cols; ++j)
-        for(size_t r=0; r < args->this_->cols; ++r)
-            (*args->result_)(args->i, j) += (*args->this_)(args->i, r) * (*args->other_)(r, j);           
+    for(size_t i=args->beg; i < lim_i; ++i)
+        for(size_t j=0; j < args->other_->cols; ++j)
+            for(size_t r=0; r < args->this_->cols; ++r)
+                (*args->result_)(i, j) += (*args->this_)(i, r) * (*args->other_)(r, j);           
 
     return nullptr;
 }
@@ -153,9 +156,9 @@ template<typename T>
 void* Matrix<T>::additionThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
-    size_t lim_j = std::min(args->i + split, args->this_->rows * args->this_->cols);
+    size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
-    for(size_t j=args->i; j < lim_j; ++j)
+    for(size_t j=args->beg; j < lim_j; ++j)
         args->result_->matrix[j] = args->this_->matrix[j] + args->other_->matrix[j];           
 
     return nullptr;
@@ -165,9 +168,9 @@ template<typename T>
 void* Matrix<T>::multConstThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
-    size_t lim_j = std::min(args->i + split, args->this_->rows * args->this_->cols);
+    size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
-    for(size_t j=args->i; j < lim_j; ++j)
+    for(size_t j=args->beg; j < lim_j; ++j)
         args->result_->matrix[j] = args->this_->matrix[j] * *args->val;           
 
     return nullptr;
@@ -177,9 +180,9 @@ template<typename T>
 void* Matrix<T>::assignmentThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
-    size_t lim_j = std::min(args->i + split, args->this_->rows * args->this_->cols);
+    size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
-    for(size_t j=args->i; j < lim_j; ++j)
+    for(size_t j=args->beg; j < lim_j; ++j)
         args->this_->matrix[j] = args->other_->matrix[j];           
 
     return nullptr;
@@ -190,9 +193,9 @@ template<typename T>
 void* Matrix<T>::assignValThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
-    size_t lim_j = std::min(args->i + split, args->this_->rows * args->this_->cols);
+    size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
-    for(size_t j=args->i; j < lim_j; ++j)
+    for(size_t j=args->beg; j < lim_j; ++j)
         args->this_->matrix[j] = *args->val;           
 
     return nullptr;
@@ -202,9 +205,9 @@ template<typename T>
 void* Matrix<T>::fillRandomThread(void* inp)
 {
     threadArgs* args = static_cast<threadArgs*>(inp);
-    size_t lim_j = std::min(args->i + split, args->this_->rows * args->this_->cols);
+    size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
-    for(size_t j=args->i; j < lim_j; ++j)
+    for(size_t j=args->beg; j < lim_j; ++j)
         args->this_->matrix[j] = args->random_();           
 
     return nullptr;
@@ -233,21 +236,18 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> & other) const
     
     Matrix result = Matrix(other);
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, &other, &result);
+        pthread_create(&thrd_ids[thrdN], nullptr, additionThread, &args[thrdN]);
+    }
 
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, this, &other, &result);
-            pthread_create(&thrd_ids[thrdN], nullptr, additionThread, &args[thrdN]);
-            i += split;
-        }
-
-        for (; thrdN > 0; --thrdN){
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
-        }
+    for (; thrdN > 0; --thrdN){
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
     }
 
     return result; 
@@ -285,21 +285,19 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> & other) const
     assert(cols == other.rows);
     
     Matrix result(rows, other.cols);
+    size_t split = rows / threadNum + 1;
 
-    for(size_t i=0; i < rows;) {
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
 
-        for (thrdN = 0; thrdN < threadNum && i < rows; ++thrdN){
-            args[thrdN] = threadArgs(i, this, &other, &result);
-            pthread_create(&thrd_ids[thrdN], nullptr, multiplicationThread, &args[thrdN]);
-            ++i;
-        }
-
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, &other, &result);
+        pthread_create(&thrd_ids[thrdN], nullptr, multiplicationThread, &args[thrdN]);
     }
+
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
 
     return result;
 }
@@ -329,21 +327,19 @@ Matrix<T> Matrix<T>::operator*(const T &n) const
     Matrix result = Matrix(rows, cols);
 
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
 
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, &n, this, nullptr, &result);
-            pthread_create(&thrd_ids[thrdN], nullptr, multConstThread, &args[thrdN]);
-            i += split;
-        }
-
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, &n, this, nullptr, &result);
+        pthread_create(&thrd_ids[thrdN], nullptr, multConstThread, &args[thrdN]);
     }
+
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
 
     return result; 
 }
@@ -394,22 +390,21 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
     matrix = new T[rows * cols];
 
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
     #ifndef NTHREADS
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
             
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){   
-            args[thrdN] = threadArgs(i, this, &other, nullptr);
-            pthread_create(&thrd_ids[thrdN], nullptr, assignmentThread, &args[thrdN]);
-            i += split;
-        }
-        
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){   
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, &other, nullptr);
+        pthread_create(&thrd_ids[thrdN], nullptr, assignmentThread, &args[thrdN]);
     }
+        
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
+    
     #else
     for(size_t i=0; i < lim_i; ++i)
         matrix[i] = other.matrix[i];
@@ -440,22 +435,21 @@ Matrix<T>::Matrix(const Matrix<T> &other)
     matrix = new T[rows * cols];
 
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
         
     #ifndef NTHREADS
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
                                                                         
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, this, &other, nullptr);
-            pthread_create(&thrd_ids[thrdN], nullptr, assignmentThread, &args[thrdN]);
-            i += split;
-        }
-            
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, &other, nullptr);
+        pthread_create(&thrd_ids[thrdN], nullptr, assignmentThread, &args[thrdN]);
     }
+            
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
+    
     #else
     for(size_t i=0; i < lim_i; ++i)
         matrix[i] = other.matrix[i];
@@ -479,23 +473,22 @@ Matrix<T>::Matrix(size_t r, size_t c, T val)
     matrix = new T[rows * cols];
 
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
     #ifndef NTHREADS
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
     
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, &val, this, nullptr, nullptr);
-            pthread_create(&thrd_ids[thrdN], nullptr, assignValThread, &args[thrdN]);
-            i += split;
-        }
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, &val, this, nullptr, nullptr);
+        pthread_create(&thrd_ids[thrdN], nullptr, assignValThread, &args[thrdN]);
+    }
 
-        for (; thrdN > 0; --thrdN){
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
-        }
-    }   
+    for (; thrdN > 0; --thrdN){
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
+    }
+       
     #else
     for(size_t i=0; i < lim_i; ++i)
         matrix[i] = 0;
@@ -675,21 +668,19 @@ void Matrix<T>::FillMatrixRandom(T (*CustomRandom)())
 #ifndef NTHREADS
 {
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
     
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, this, nullptr, nullptr, &CustomRandom);
-            pthread_create(&thrd_ids[thrdN], nullptr, fillRandomThread, &args[thrdN]);
-            i += split;
-        }
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, nullptr, nullptr, &CustomRandom);
+        pthread_create(&thrd_ids[thrdN], nullptr, fillRandomThread, &args[thrdN]);
+    }
 
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
-    }   
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
 }
 #else
 {
@@ -704,21 +695,20 @@ void Matrix<T>::FillMatrixRandom()
 #ifndef NTHREADS
 {
     size_t lim_i = rows * cols;
+    size_t split = lim_i / threadNum + 1;
 
-    for(size_t i=0; i < lim_i;){
-        pthread_t thrd_ids[threadNum];
-        threadArgs args[threadNum];
-        size_t thrdN;
+    pthread_t thrd_ids[threadNum];
+    threadArgs args[threadNum];
+    size_t thrdN;
     
-        for (thrdN = 0; thrdN < threadNum && i < lim_i; ++thrdN){
-            args[thrdN] = threadArgs(i, this, nullptr, nullptr, &Random<T>);
-            pthread_create(&thrd_ids[thrdN], nullptr, fillRandomThread, &args[thrdN]);
-            i += split;
-        }
+    for (thrdN = 0; thrdN < threadNum; ++thrdN){
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, nullptr, nullptr, &Random<T>);
+        pthread_create(&thrd_ids[thrdN], nullptr, fillRandomThread, &args[thrdN]);
+    }
 
-        for (; thrdN > 0; --thrdN)
-            pthread_join(thrd_ids[thrdN - 1], nullptr);
-    }   
+    for (; thrdN > 0; --thrdN)
+        pthread_join(thrd_ids[thrdN - 1], nullptr);
+
 }
 #else
 {
