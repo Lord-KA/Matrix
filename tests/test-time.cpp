@@ -14,6 +14,9 @@ constexpr size_t passesSum = 10;
 
 TEST(Manual, Basic)
 {
+    #ifndef NTHREADS
+    setThreadNum(4);
+    #endif  
     Matrix<int> M1(10, 10), M2(10, 10), M3;
     M1.FillMatrixRandom();
     M2.FillMatrixRandom();

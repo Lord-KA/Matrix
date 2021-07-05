@@ -7,6 +7,9 @@ constexpr size_t n = 2;
 constexpr size_t k = 17;
 
 TEST(Multiplication, toEandConst) {
+    #ifndef NTHREADS
+    setThreadNum(4);
+    #endif
     Matrix<int> M1(n, n), M2(n, n);
     M1(0, 0) = 1;
     M1(0, 1) = 2;
@@ -77,10 +80,26 @@ TEST(Multiplication, RandomDiffSize) {
     }
 }
 
+TEST(Summing, Basic) {
+    for(int i = 0; i < 1; ++i){
+        int a = 3, b = 3;
+        Matrix<int> M1(a, b), M2(a, b);
+        M1.FillMatrixRandom();
+        M2.FillMatrixRandom();
+    
+        SPMatrix<int> S1(M1), S2(M2);
+        // std::cout << M1 << '\n' << M2 << '\n' << M1 - M2 << '\n' << M2 - M1 << "\n===============================\n";
+        EXPECT_EQ( SPMatrix<int>(M1 + M2), S1 + S2 );
+        EXPECT_EQ( SPMatrix<int>(M2 + M1), S2 + S1 );
+        EXPECT_EQ( SPMatrix<int>(M1 + M1), S1 + S1 );
+        EXPECT_EQ( SPMatrix<int>(M2 + M2), S2 + S2 );
+        EXPECT_NE( SPMatrix<int>(M1 + M1 + M1), S1 + S2 );
+    }
+}
 
 TEST(Summing, RandomDiffSize) {
     for(int i = 0; i < 5; ++i){
-        int a = rnd() % 30 + 3, b = rnd() % 30 + 3;
+        int a = rnd() % 25 + 3, b = rnd() % 25 + 3;
         Matrix<int> M1(a, b), M2(a, b);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
@@ -186,7 +205,7 @@ TEST(Other, Copy) {
 
 TEST(Other, Move) {
     for (int i = 0; i < 3; ++i){
-        Matrix<int> M1(18, 39), M2, M3, M4;
+        Matrix<int> M1(18, 29), M2, M3, M4;
         M1.FillMatrixRandom();
         M2 = M1;
         M2.FillMatrixRandom();
