@@ -53,5 +53,5 @@ int main()
     M2.FillMatrixRandom();
     Matrix M3 = M1 * 5 - M2 * 18;
     }
-    std::cout << "Multiplications by number is good\n";
+    std::cout << "Multiplication by number is good\n";
 }
