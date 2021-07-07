@@ -14,9 +14,6 @@ constexpr size_t passesSum = 10;
 
 TEST(Manual, Basic)
 {
-    #ifndef NTHREADS
-    setThreadNum(4);
-    #endif  
     Matrix<int> M1(10, 10), M2(10, 10), M3;
     M1.FillMatrixRandom();
     M2.FillMatrixRandom();
@@ -152,5 +149,16 @@ TEST(Other, Move) {
     
         Matrix<int> M5(std::move(M3));
     }     
+}
+
+int main(int argc, char* argv[]) {
+    #ifndef NTHREADS
+    setThreadNum(4);
+    std::cout << "Test runs in " << getThreadNum() << " threads\n";
+    #else
+    std::cout << "Test runs in one thread\n";
+    #endif
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
 

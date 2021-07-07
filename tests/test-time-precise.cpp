@@ -6,7 +6,7 @@
 
 static size_t counter = -1;
 
-static constexpr size_t basicSize = 1e3;
+static constexpr size_t basicSize = 1e4;
 static constexpr size_t passes = 1e1;
 
 void test_0()
@@ -103,7 +103,11 @@ int main()
 {
     #ifndef NTHREADS
     setThreadNum(4);
+    std::cout << "Test runs in " << getThreadNum() << " threads\n";
+    #else
+    std::cout << "Test runs in one thread\n";
     #endif
+
 
     test_0();
     test_1();
