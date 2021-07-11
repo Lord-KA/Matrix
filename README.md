@@ -11,9 +11,13 @@ $ make
 ```
 
 ## TODO
-1. Linear system solving
+1. Linear system solving (? LDU decomposition/Gauss with partial pivoting)
+  1. ? Matrix rank
+  2. ? Matrix norm(s)
 2. Add second tier linear algebra operations support
 3. Add paralleling to algebra logic (Gaussian alg etc.)
+4. ? use BLAS/LAPACK/uBLAS for standard types
+5. ? use autotools in addition to CMake
 
 ## Done
 1. Matrix on arbitrary objects
