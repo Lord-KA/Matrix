@@ -178,7 +178,7 @@ void* Matrix<T>::multConstThread(void* inp)
     size_t lim_j = std::min(args->end, args->this_->rows * args->this_->cols);
 
     for(size_t j=args->beg; j < lim_j; ++j)
-        args->result_->matrix[j] = args->this_->matrix[j] * *args->val;           
+        args->result_->matrix[j] = args->this_->matrix[j] * *args->val;
 
     return nullptr;
 }
