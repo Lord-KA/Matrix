@@ -42,3 +42,37 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build/tests
       run: ./general-test
+
+
+  release-general-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build/tests
+      run: ./general-test
+
+
+  release-nthread-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=NThreads_Release
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config NThreads_Release
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build/tests
+      run: ./general-test
