@@ -34,10 +34,10 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=NThread_Sanitizer
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=NThreads_Sanitizer
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config NThread_Sanitizer
+      run: cmake --build ${{github.workspace}}/build --config NThreads_Sanitizer
 
     - name: Test
       working-directory: ${{github.workspace}}/build/tests
