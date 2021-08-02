@@ -23,3 +23,4 @@ $ make
 5. Random matrix generator with custom algorithm support
 6. Autotests (97% line coverage)
 7. Multithreading to basic operators
+8. GitHub Actions configuration
