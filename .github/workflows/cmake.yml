@@ -23,9 +23,9 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config Sanitizer
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/build/tests
       # run: ctest -C Sanitizer
-      run : ./build/tests/matrix
+      run : ./matrix
   
 
   nthread-test:
@@ -41,9 +41,9 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config NThread_Sanitizer
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/build/tests
       # run: ctest -C NThread_Sanitizer 
-      run: ./build/tests/matrix
+      run: ./matrix
 
 
   benchmark:
@@ -59,8 +59,8 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config Release
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/build/tests
       # run: ctest -C Release
-      run: ./build/tests/time
+      run: ./time
  
  
