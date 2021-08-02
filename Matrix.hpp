@@ -455,7 +455,7 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 template<typename T>
 Matrix<T>::~Matrix()
 {
-    //delete[] matrix;
+    delete[] matrix;
 
     matrix = nullptr;
 }
