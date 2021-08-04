@@ -5,6 +5,7 @@
 #include <cassert>
 #include <random>
 #include <utility>
+#include <tuple>
 
 
 #ifndef NTHREADS
@@ -13,7 +14,29 @@
 static size_t threadNum = 1;
 #endif
 
-static int randomDispersion = 1e2;
+#ifndef NDEBUG
+
+#define ASSERT(v) { \
+    if ( !(v) ) { \
+        std::cerr << "Assertion failed in " << __func__ << " at " << __LINE__ << '\n' << "rows = " << rows  << "\ncols = " << cols << '\n'; \
+        if (rows * cols) \
+            std::cerr << *this << '\n'; \
+        else \
+            std::cerr << "EMPTY\n"; \
+        std::cerr.flush(); \
+        exit(0); \
+    } \
+}
+
+#else
+
+#define ASSERT(v)
+
+#endif
+
+static size_t randomDispersion = 1e2;
+
+// static double doubleEps = 1e-6;
 
 
 template<typename T> //DEBUG
@@ -27,13 +50,13 @@ class Matrix
 
         size_t rows;
         size_t cols;
-        T determinant;
-        bool determinantIsNaN;
 
         T *matrix;
         
     public:
-        Matrix( size_t rows = 0, size_t cols = 0, T val = 0 );
+        Matrix();
+        Matrix( size_t rows, size_t cols, T val = 0 );
+        Matrix( size_t rows, size_t cols, std::initializer_list<T> ilist );
         Matrix( const Matrix & other );
         Matrix( Matrix&& other );
 
@@ -50,6 +73,8 @@ class Matrix
         void swapRows( size_t i, size_t j );
         T MinorsMethod() const;
         Matrix Minor ( size_t i, size_t j ) const;
+
+        std::tuple<Matrix, Matrix, Matrix> LDUDecomposition() const;
 
         Matrix Transposition() const;
 
@@ -79,6 +104,32 @@ class Matrix
     {
         return M * n;
     }
+
+    #ifndef NDEBUG
+    
+    void dump( std::ostream& out ) const
+    {
+        #ifndef NTHREADS
+            #define THREADS 1
+        #else
+            #define THREADS 0
+        #endif
+
+        out << "#############################################\n";
+        out << __DATE__ << '\t' << __FILE__ << '\n';
+        if (THREADS)
+            out << "Threads are on!\n"; 
+        else
+            out << "Threads are off!\n"; 
+        out << "\nrows = " << rows << "\ncols = " << cols << '\n';
+        if (rows * cols) 
+            out << *this;
+        else
+            out << "Matrix is empty!\n";
+        out << "#############################################\n";
+    }
+
+    #endif  
 
     #ifndef NTHREADS 
 
@@ -380,7 +431,7 @@ Matrix<T> Matrix<T>::operator*(const T &n) const
 }
 #else
 {
-    Matrix result = Matrix(rows, cols);
+    Matrix result(rows, cols);
 
     for(size_t i=0; i < rows * cols; ++i)
         result.matrix[i] = matrix[i] * n;
@@ -395,15 +446,13 @@ Matrix<T>& Matrix<T>::operator=(Matrix&& other)
 {
     if(this == &other)
         return *this;
-    
-    delete[] matrix;
+ 
+    if (matrix)
+        delete[] matrix;
 
     matrix = std::exchange(other.matrix, nullptr);
     rows   = std::exchange(other.rows, 0);
     cols   = std::exchange(other.cols, 0);
-
-    determinant      = other.determinant;
-    determinantIsNaN = other.determinantIsNaN;
 
     return *this;
 }
@@ -416,9 +465,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 
     rows = other.rows;
     cols = other.cols;
-
-    determinant = other.determinant;
-    determinantIsNaN = other.determinantIsNaN;
 
     T *temp = matrix;
 
@@ -446,7 +492,8 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
         matrix[i] = other.matrix[i];
     #endif
 
-    delete[] temp;
+    if (temp) 
+        delete[] temp;
 
     return *this;
 }
@@ -455,7 +502,8 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &other)
 template<typename T>
 Matrix<T>::~Matrix()
 {
-    delete[] matrix;
+    if (matrix)
+        delete[] matrix;
 
     matrix = nullptr;
 }
@@ -465,8 +513,6 @@ Matrix<T>::Matrix(const Matrix<T> &other)
 {
     rows = other.rows;
     cols = other.cols;
-    determinant = other.determinant;
-    determinantIsNaN = other.determinantIsNaN;
 
     matrix = new T[rows * cols];
 
@@ -499,14 +545,19 @@ Matrix<T>::Matrix(Matrix&& other)
     matrix = std::exchange(other.matrix, nullptr);
     rows   = std::exchange(other.rows, 0);
     cols   = std::exchange(other.cols, 0);
-    determinant      = std::exchange(other.determinant, 0);
-    determinantIsNaN = std::exchange(other.determinantIsNaN, true);
 }
 
 template<typename T>
+Matrix<T>::Matrix() 
+    : rows(0), cols(0), matrix(nullptr) {}
+
+template<typename T>
 Matrix<T>::Matrix(size_t r, size_t c, T val)
-    : rows(r), cols(c), determinant(0), determinantIsNaN(true)
+    : rows(r), cols(c), matrix(nullptr)
 {
+    if (rows * cols == 0)
+        return;
+
     matrix = new T[rows * cols];
 
     size_t lim_i = rows * cols;
@@ -532,6 +583,35 @@ Matrix<T>::Matrix(size_t r, size_t c, T val)
     #endif
 }
 
+template<typename T>
+Matrix<T>::Matrix(size_t rows, size_t cols, std::initializer_list<T> ilist)  //TODO add multithreading version
+    : rows(rows), cols(cols), matrix(nullptr)
+{
+    if (rows * cols == 0)
+        return;
+
+    matrix = new T[rows * cols];
+    std::copy(ilist.begin(), ilist.end(), matrix);
+    for (size_t i = std::distance(ilist.begin(), ilist.end()); i < rows * cols; ++i)
+        matrix[i] = 0;
+} 
+
+
+
+template<typename T>
+std::tuple<Matrix<T>, Matrix<T>, Matrix<T>> Matrix<T>::LDUDecomposition() const
+{
+    assert(rows == cols);
+    size_t n = rows;
+    Matrix Lower(n, n), Diagonal(n, n), Upper(n, n);
+
+    Diagonal = GaussianMethod();
+
+
+
+    return std::make_tuple(Lower, Diagonal, Upper);
+}
+
 
 template<typename T>
 Matrix<T> Matrix<T>::Transposition() const
@@ -549,24 +629,22 @@ Matrix<T> Matrix<T>::Transposition() const
 template<typename T>
 T Matrix<T>::CalcDeterminant()
 {
-    if (!determinantIsNaN)
-        return determinant;
-    
     if (rows != cols) 
         return MinorsMethod();
     
+    if (rows * cols == 0)
+        return 0;
 
-    determinant = 1;
-    determinantIsNaN = false;
     Matrix Triangular = GaussianMethod();
     if (Triangular.matrix == nullptr){
-        determinant = MinorsMethod();
-        return determinant;
+        return MinorsMethod();
     }
-    for(size_t i=0; i < rows; ++i)
-        determinant *= Triangular(i, i);
 
-    return determinant;
+    T result = 1;
+    for(size_t i=0; i < rows; ++i)
+        result *= Triangular(i, i);
+
+    return result;
 }
 
 template<typename T>
@@ -583,9 +661,10 @@ Matrix<T> Matrix<T>::GaussianMethod() const
             if (i != cols){
                 result.swapRows(k, i);
                 determinant_ratio *= -1;
-            }
-            else
-                return Matrix<T>();
+            }                           
+            // else                     //TODO check this case for alg
+            //     assert(false);
+                // return Matrix<T>();
         }
         
         for (size_t i=k+1; i < rows; ++i)
@@ -688,7 +767,7 @@ void Matrix<T>::FillMatrixRandom(T (*CustomRandom)())
     size_t thrdN;
     
     for (thrdN = 0; thrdN < threadNum; ++thrdN){
-        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, nullptr, nullptr, &CustomRandom);
+        args[thrdN] = threadArgs(thrdN * split, (thrdN + 1) * split, this, nullptr, nullptr, CustomRandom);
         pthread_create(&thrd_ids[thrdN], nullptr, fillRandomThread, &args[thrdN]);
     }
 
@@ -752,7 +831,8 @@ void Matrix<T>::ReadMatrix()
     std::cin >> r >> c;
     if (r * c != rows * cols)
     {
-        delete[] matrix;
+        if (matrix)
+            delete[] matrix;
         matrix = new T[rows * cols];
         rows = r;
         cols = c;

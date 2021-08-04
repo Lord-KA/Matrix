@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cmath>
 #include <random>
-
+#include <cassert>
 
 class Rational
 {

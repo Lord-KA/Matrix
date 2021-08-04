@@ -148,16 +148,20 @@ size_t Rational::recursiveGCD(size_t n, size_t k)
 
 Rational Rational::Simplify()
 {
+    if (!numerator)
+        return *this;
+
     if (denomenator < 0)
     {
         denomenator *= -1;
         numerator *= -1;
     }
-    long long int GCD;
+    unsigned long long int GCD;
     if (abs(denomenator) + abs(numerator) < 2000)
         GCD = Rational::binaryGCD(abs(denomenator), abs(numerator));
     else
         GCD = Rational::recursiveGCD(abs(denomenator), abs(numerator));
+    assert(GCD);
     this->numerator /= GCD;
     this->denomenator /=GCD;
     return (*this);
